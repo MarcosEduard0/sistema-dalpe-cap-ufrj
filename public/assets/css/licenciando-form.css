@@ -1,0 +1,78 @@
+.licenciando-page { --lic-accent:#087c96; --lic-bright:#4ec7cd; --lic-ink:#243e4c; --lic-muted:#71838e; --lic-border:#dce8ed; color:var(--lic-ink); padding:0 0 12px; }
+.licenciando-layout { display:grid; grid-template-columns:minmax(280px,.85fr) minmax(0,2.15fr); gap:22px; align-items:start; }
+.licenciando-sidebar,.licenciando-main { min-width:0; }
+.licenciando-page .card { margin:0 0 20px; border:1px solid #e3ebef; border-radius:15px; background:#fff; box-shadow:0 4px 12px #233e4b0a; overflow:hidden; }
+.licenciando-page a { color:var(--lic-accent); }
+.licenciando-page a:focus-visible,.licenciando-page button:focus-visible,.licenciando-page select:focus-visible { outline:3px solid #4ec7cd; outline-offset:3px; }
+.licenciando-page .licenciando-profile-cover { height:112px; background:linear-gradient(125deg,#087c96,#22a7b8 65%,#56ccd0); position:relative; overflow:hidden; }
+.licenciando-profile-cover::before,.licenciando-profile-cover::after { content:''; position:absolute; width:120%; height:170px; border-radius:50%; background:#ffffff12; transform:rotate(-15deg); top:-125px; left:5%; }
+.licenciando-profile-cover::after { background:#00576b20; top:50px; left:-35%; }
+.licenciando-profile-body { text-align:center; padding:0 22px 22px; }
+.licenciando-photo-picker { position:relative; display:block; width:112px; margin:-63px auto 16px; cursor:pointer; }
+.licenciando-photo-picker img { width:112px; height:112px; object-fit:cover; background:#f2f6f8; border:5px solid #fff; border-radius:50%; box-shadow:0 4px 10px #193b4d22; }
+.licenciando-photo-picker input { position:absolute; width:1px; height:1px; overflow:hidden; opacity:0; }
+.licenciando-photo-picker:focus-within { outline:3px solid #4ec7cd; border-radius:50%; outline-offset:4px; }
+.licenciando-photo-icon { position:absolute; right:0; bottom:6px; display:flex; align-items:center; justify-content:center; width:29px; height:29px; border:2px solid #fff; border-radius:50%; color:#fff; background:var(--lic-accent); font-size:16px; }
+.licenciando-page .licenciando-profile-name { margin:0 0 7px; font-size:21px; line-height:1.4; font-weight:800; color:var(--lic-accent); overflow-wrap:anywhere; }
+.licenciando-profile-dre { color:var(--lic-muted); font-size:14px; margin:0 0 19px; }
+.licenciando-sector-switch { max-width:320px; margin:auto; }
+.licenciando-sector-switch label { display:block; font-size:11px; text-align:left; margin-bottom:5px; color:var(--lic-muted); }
+.licenciando-sector-control { position:relative; }
+.licenciando-sector-control>i { position:absolute; left:12px; top:11px; font-size:20px; color:var(--lic-accent); pointer-events:none; }
+.licenciando-page .licenciando-sector-control select { padding-left:40px; font-size:13px; border:1px solid var(--lic-border); border-radius:8px; height:41px; }
+.licenciando-profile-hint { color:var(--lic-muted); font-size:12px; line-height:1.7; max-width:260px; margin:0 auto; }
+.licenciando-profile-stats { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); margin:0 18px 22px; padding-top:18px; border-top:1px solid var(--lic-border); }
+.licenciando-profile-stats>div { display:flex; flex-direction:column; align-items:center; justify-content:flex-start; min-width:0; padding:0 5px; border-right:1px solid var(--lic-border); text-align:center; }
+.licenciando-profile-stats>div:last-child { border:0; }
+.licenciando-profile-stats i { color:var(--lic-accent); font-size:22px; margin-bottom:7px; }
+.licenciando-profile-stats dt { order:2; color:var(--lic-muted); font-size:10px; font-weight:400; line-height:1.4; margin-top:6px; }
+.licenciando-profile-stats dd { margin:0; font-size:16px; line-height:24px; font-weight:800; }
+.licenciando-status { display:inline-block; font-size:10px; line-height:1.5; font-weight:700; background:#edf2f5; color:#576d7b; border-radius:6px; padding:4px 6px; }
+.licenciando-status-concluido { background:#e2f4f8; color:#087c96; }
+.licenciando-status-ativo { background:#e5f6ed; color:#21794d; }
+.licenciando-status-pendente { background:#fff5db; color:#946606; }
+.licenciando-page .licenciando-form-card>.card-body { padding:20px 24px 24px; }
+.licenciando-section { min-width:0; border:0; padding:0; margin:0 0 18px; }
+.licenciando-section:last-of-type { margin-bottom:0; }
+.licenciando-section-title { display:flex; align-items:center; gap:9px; float:none; width:100%; padding:6px 12px; margin:0 0 13px; border:0; border-radius:8px; background:linear-gradient(90deg,#e2f4f7,#ecf8f9); color:var(--lic-accent); font-size:14px; line-height:1.5; font-weight:800; }
+.licenciando-section-title i { font-size:20px; }
+.licenciando-page #licenciando-form .row { margin-left:-6px; margin-right:-6px; }
+.licenciando-page #licenciando-form .row>[class*='col-'] { padding-left:6px!important; padding-right:6px!important; }
+.licenciando-page #licenciando-form .form-group { margin-bottom:12px; }
+.licenciando-page #licenciando-form label { font-size:11px; font-weight:600; color:#536d7c; margin-bottom:4px; }
+.licenciando-page #licenciando-form .form-control,.licenciando-page #licenciando-form .custom-select { height:38px; min-width:0; font-size:13px; color:#2f4653; border:1px solid #d4e1e8; border-radius:6px; background-color:#fff; box-shadow:none; }
+.licenciando-page #licenciando-form .form-control:focus,.licenciando-page #licenciando-form .custom-select:focus { border-color:#26a9b9; box-shadow:0 0 0 3px #26a9b914; }
+.licenciando-page #licenciando-form input:disabled,.licenciando-page #licenciando-form select:disabled { color:#6b7e89; background-color:#f0f4f6; opacity:1; }
+.licenciando-page #licenciando-form textarea.form-control { height:auto; min-height:100px; resize:vertical; padding:10px 12px; line-height:1.6; }
+.licenciando-page #licenciando-form small { font-size:10px; line-height:1.6; }
+.licenciando-page #licenciando-form .choices { margin-bottom:0; }
+.licenciando-page #licenciando-form .choices__inner { min-height:40px; border:1px solid #d4e1e8; border-radius:6px; background:#fff; padding:4px 7px; }
+.licenciando-page #licenciando-form .choices__list--multiple .choices__item { background:#0b94aa; border-color:#0b94aa; margin-bottom:0; }
+.licenciando-page #licenciando-form .choices__input { background:#fff; font-size:12px; margin-bottom:0; }
+.licenciando-page #divSetor>.js-vinculo { margin:0 0 14px; padding:14px 8px 4px; border:1px solid var(--lic-border); border-radius:10px; background:#fbfdfe; }
+.licenciando-form-actions { display:flex; justify-content:space-between; align-items:center; gap:12px; border-top:1px solid #e8eff2; padding-top:17px; margin-top:5px; }
+.licenciando-page .licenciando-form-actions .btn { display:flex; align-items:center; justify-content:center; gap:8px; min-width:210px; margin:0; padding:12px 22px; background:linear-gradient(110deg,#087c96,#129eaf); border:0; border-radius:25px; color:#fff; font-size:12px; font-weight:800; box-shadow:0 4px 9px #087c9619; }
+.licenciando-page .licenciando-form-actions .btn:hover { background:#076f86; }
+.licenciando-form-actions .btn i { font-size:20px; }
+.licenciando-back { display:inline-flex; align-items:center; gap:5px; font-size:12px; }
+.licenciando-errors { margin:18px 22px 0; }
+.licenciando-errors ul { margin:0; }
+.licenciando-page .licenciando-documents { padding:19px 17px; }
+.licenciando-documents-heading { display:flex; align-items:center; gap:9px; }
+.licenciando-documents-icon { display:inline-flex; width:35px; height:35px; align-items:center; justify-content:center; font-size:23px; color:var(--lic-accent); border-radius:9px; background:#e7f5f8; }
+.licenciando-page .licenciando-documents-heading h2 { margin:0; font-size:18px; font-weight:800; color:var(--lic-ink); }
+.licenciando-documents-count { margin-left:auto; font-size:11px; background:#edf5f7; color:var(--lic-accent); border-radius:6px; padding:3px 8px; }
+.licenciando-documents-caption { color:var(--lic-muted); font-size:11px; margin:9px 0 14px; }
+.licenciando-document-list { list-style:none; padding:0; margin:0; display:grid; gap:9px; }
+.licenciando-document-card { display:flex; align-items:center; gap:10px; padding:12px 10px; min-height:64px; border:1px solid #dce8ed; border-radius:9px; background:linear-gradient(120deg,#fff,#f8fcfd); transition:background .15s,border-color .15s; }
+.licenciando-document-card:hover { background:#edf8fa; border-color:#87c8d2; text-decoration:none; }
+.licenciando-document-icon { font-size:24px; display:flex; flex-shrink:0; }
+.licenciando-document-text { flex:1; min-width:0; }
+.licenciando-document-text strong { display:block; font-size:11px; font-weight:800; line-height:1.5; overflow-wrap:anywhere; }
+.licenciando-document-text small { display:block; color:#81939d; font-size:10px; margin-top:3px; }
+.licenciando-document-open { font-size:20px; flex-shrink:0; color:#339daf; }
+@media(min-width:1600px) { .licenciando-layout { grid-template-columns:minmax(320px,.8fr) minmax(0,2.2fr); } }
+@media(max-width:1199px) and (min-width:768px) { .licenciando-layout { grid-template-columns:minmax(230px,.8fr) minmax(0,1.6fr); gap:16px; } .licenciando-page .licenciando-form-card>.card-body { padding:18px; } .licenciando-page #licenciando-form .row>.col-md-2 { flex:0 0 50%; max-width:50%; } .licenciando-page #licenciando-form .row>.col-md-8 { flex:0 0 100%; max-width:100%; } .licenciando-profile-stats { margin-left:10px; margin-right:10px; } }
+@media(max-width:991px) { .licenciando-layout { grid-template-columns:minmax(0,1fr); } .licenciando-sidebar { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:16px; align-items:start; } .licenciando-page .card { margin-bottom:0; } .licenciando-profile-cover { height:100px; } .licenciando-page .licenciando-documents { height:100%; } .licenciando-main { margin-top:2px; } }
+@media(max-width:575px) { .licenciando-sidebar { grid-template-columns:minmax(0,1fr); gap:16px; } .licenciando-page .licenciando-form-card>.card-body { padding:16px; } .licenciando-form-actions { flex-direction:column-reverse; padding-top:16px; gap:17px; } .licenciando-page .licenciando-form-actions .btn { width:100%; } .licenciando-section-title { font-size:13px; } .licenciando-profile-body { padding-bottom:18px; } .licenciando-documents-caption { margin-bottom:12px; } .licenciando-page #licenciando-form .form-control,.licenciando-page #licenciando-form .custom-select { font-size:14px; height:42px; } }
+@media(prefers-reduced-motion:reduce) { .licenciando-document-card { transition:none; } }

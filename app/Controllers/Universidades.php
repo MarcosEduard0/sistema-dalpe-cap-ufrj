@@ -22,7 +22,7 @@ class Universidades extends BaseController
     {
         $this->data = [
             'titulo' => 'Universidades',
-            'universidades' => $this->universidadeModel->getUniversidades(),
+            'universidades' => $this->universidadeModel->getUniversidadesComTotais(),
         ];
         $sessionData['posicao'] = 'Universidade';
         session()->set($sessionData);
@@ -36,13 +36,14 @@ class Universidades extends BaseController
      */
     public function adicionar()
     {
+        session()->set('posicao', 'Universidade');
         $this->data['titulo'] = 'Adicionar';
 
         if ($this->request->getMethod() == 'post') {
             $this->salvar();
             if (!isset($this->data['validation'])) {
                 session()->setFlashdata('msg', msgbox('success', 'A universidade foi adicionado.'));
-                return redirect('universidades');
+                return redirect()->to('universidades');
             }
         }
         $this->data['body'] = view('universidades/universidades_adicionar', $this->data);
@@ -55,6 +56,7 @@ class Universidades extends BaseController
      */
     public function editar($id = null)
     {
+        session()->set('posicao', 'Universidade');
         $this->data = [
             'titulo' => 'Editar',
             'universidade' => $this->universidadeModel->getUniversidades($id),
@@ -102,9 +104,27 @@ class Universidades extends BaseController
      */
     public function excluir($id = null)
     {
-
-        $this->universidadeModel->delete($id);
-        session()->setFlashdata('msg', msgbox('success', 'A universidade foi deletada.'));
-        return redirect('universidades');
+        $db = \Config\Database::connect();
+        $db->transBegin();
+        try {
+            $universidade = $db->query('SELECT universidade_id FROM universidades WHERE universidade_id = ? FOR UPDATE', [$id])->getRowArray();
+            if (!$universidade) throw new \CodeIgniter\Exceptions\PageNotFoundException();
+            if ($db->table('licenciandos')->where('universidade_id', $id)->countAllResults()) {
+                $db->transRollback();
+                session()->setFlashdata('msg', msgbox('danger', 'Esta universidade possui licenciandos vinculados e não pode ser excluída.'));
+                return redirect()->to('universidades');
+            }
+            if (!$this->universidadeModel->delete($id) || !$db->transStatus()) throw new \RuntimeException('Falha na exclusão.');
+            $db->transCommit();
+        } catch (\CodeIgniter\Exceptions\PageNotFoundException $erro) {
+            $db->transRollback(); throw $erro;
+        } catch (\Throwable $erro) {
+            $db->transRollback();
+            log_message('error', 'Falha ao excluir universidade: {erro}', ['erro' => $erro->getMessage()]);
+            session()->setFlashdata('msg', msgbox('danger', 'Não foi possível excluir a universidade. Tente novamente.'));
+            return redirect()->to('universidades');
+        }
+        session()->setFlashdata('msg', msgbox('success', 'A universidade foi excluída.'));
+        return redirect()->to('universidades');
     }
 }

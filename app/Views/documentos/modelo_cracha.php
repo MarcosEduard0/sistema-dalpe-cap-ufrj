@@ -49,8 +49,8 @@
 <body>
     <div class="cracha">
         <div class="imagem">
-            <img style=" width: auto;height: 70px;" src='public/assets/img/documentos/UFRJ2.jpg' />
-            <img style=" width: auto;height: 75px; padding-left: 25%;" src='public/assets/img/documentos/CAP.jpg' />
+            <img style=" width: auto;height: 70px;" src='public/assets/img/documentos/UFRJ.jpg' />
+            <img style=" width: auto;height: 75px; padding-left: 25%;" src='public/assets/img/documentos/CAP.png' />
         </div>
         <div class="ano"><b>ANO LETIVO <?= date('Y') ?></b></div>
         <div class="aluno">

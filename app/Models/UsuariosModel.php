@@ -15,6 +15,11 @@ class UsuariosModel extends Model
     // protected $beforeUpdate = ['beforeUpdate'];
 
     //metodo get
+    public function getUsuariosParaListagem()
+    {
+        return $this->select('usuario_id, usuario, nome_completo, nome_social, cargo, authlevel, ultimo_login')->findAll();
+    }
+
     public function getUsuarios($id = false)
     {
 

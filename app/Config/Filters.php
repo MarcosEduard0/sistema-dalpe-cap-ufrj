@@ -6,6 +6,8 @@ use CodeIgniter\Config\BaseConfig;
 use CodeIgniter\Filters\CSRF;
 use CodeIgniter\Filters\DebugToolbar;
 use CodeIgniter\Filters\Honeypot;
+use \App\Filters\LoginFilter;
+use \App\Filters\AdminFilter;
 
 class Filters extends BaseConfig
 {
@@ -19,8 +21,8 @@ class Filters extends BaseConfig
         'csrf'     => CSRF::class,
         'toolbar'  => DebugToolbar::class,
         'honeypot' => Honeypot::class,
-        'login' => \App\Filters\LoginFilter::class,
-
+        'login' => LoginFilter::class,
+        'admin'    => AdminFilter::class,
     ];
 
     /**
@@ -29,23 +31,7 @@ class Filters extends BaseConfig
      *
      * @var array
      */
-    public $globals = [
-        'before' => [
-            'honeypot',
-            'login' => [
-                'except' => [
-                    '/',
-                    'login',
-                    'usuarios/login',
-                ]
-            ],
-            // 'csrf',
-        ],
-        'after' => [
-            'toolbar',
-            'honeypot',
-        ],
-    ];
+    public $globals = [];
 
     /**
      * List of filter aliases that works on a

@@ -1,21 +1,22 @@
 <?php if (isset($licenciando)) $baseUrl = 'editar/' . $licenciando['licenciando_id'] . '/' . $licenciandoSetor_id;
 else $baseUrl = 'adicionar'; ?>
 
-<div class="col-md-12">
-    <div class="row">
-        <div class="col-md-4">
-            <div class="card card-user">
+<link rel="stylesheet" href="<?= base_url('public/assets/css/licenciando-form.css') . '?v=' . filemtime(FCPATH . 'public/assets/css/licenciando-form.css') ?>">
+<div class="licenciando-page">
+    <div class="licenciando-layout">
+        <aside class="licenciando-sidebar">
+            <div class="card card-user licenciando-profile">
                 <?= $componente_card_usuario ?>
             </div>
             <?php if (isset($licenciando)) echo $componente_documentos ?>
-        </div>
-        <div class="col-md-8">
-            <div class="card card-user">
-                <div class="card-header">
-                    <?= (isset($validation)) ? $validation->listErrors() : '' ?>
-                </div>
+        </aside>
+        <div class="licenciando-main">
+            <div class="card licenciando-form-card">
+                <?php if (isset($validation)): ?><div class="alert alert-danger licenciando-errors" role="alert"><?= $validation->listErrors() ?></div><?php endif ?>
                 <div class="card-body">
-                    <form class="needs-validation" novalidate action="<?= base_url('/licenciandos/' . $baseUrl) ?>" method="post">
+                    <form id="licenciando-form" class="needs-validation" novalidate action="<?= base_url('/licenciandos/' . $baseUrl) ?>" method="post">
+                        <fieldset class="licenciando-section">
+                            <legend class="licenciando-section-title"><i class="bx bx-user" aria-hidden="true"></i> Dados pessoais</legend>
                         <div class="row">
                             <div class="col-md-6 pr-1">
                                 <div class="form-group">
@@ -59,7 +60,7 @@ else $baseUrl = 'adicionar'; ?>
                                     }
                                     $field = 'universidade_id';
                                     $value = set_value($field, isset($licenciando) ? $licenciando['universidade_id'] : '', FALSE);
-                                    echo form_dropdown('universidade_id', $universidade_options, $value, 'tabindex="-1" class="custom-select mr-sm-2" required');
+                                    echo form_dropdown('universidade_id', $universidade_options, $value, 'class="custom-select mr-sm-2" required');
                                     ?>
                                     <div class="invalid-feedback">
                                         Universidade é obrigatório
@@ -67,6 +68,9 @@ else $baseUrl = 'adicionar'; ?>
                                 </div>
                             </div>
                         </div>
+                        </fieldset>
+                        <fieldset class="licenciando-section">
+                            <legend class="licenciando-section-title"><i class="bx bx-map" aria-hidden="true"></i> Contato e endereço</legend>
                         <div class="row">
                             <div class="col-md-4 pr-1">
                                 <div class="form-group">
@@ -107,6 +111,9 @@ else $baseUrl = 'adicionar'; ?>
                                 </div>
                             </div>
                         </div>
+                        </fieldset>
+                        <fieldset class="licenciando-section">
+                            <legend class="licenciando-section-title"><i class="bx bxs-graduation" aria-hidden="true"></i> Dados acadêmicos e estágio</legend>
                         <?php if (!isset($licenciando)) : ?>
                             <div class="row">
                                 <div class="col-md-12">
@@ -117,7 +124,7 @@ else $baseUrl = 'adicionar'; ?>
                                 </div>
                             </div>
                             <div id="divSetor">
-                                <div class="row" name="novoSetor">
+                                <div class="row js-vinculo" name="novoSetor">
                                     <div class="col-md-4 pr-1">
                                         <div class="form-group">
                                             <label for="setores">Setor</label>
@@ -132,7 +139,7 @@ else $baseUrl = 'adicionar'; ?>
                                                 'setor_id[]',
                                                 $setores_options,
                                                 $value,
-                                                'tabindex="-1" class="custom-select mr-sm-2" required'
+                                                'class="custom-select mr-sm-2" required'
                                             );
                                             ?>
                                         </div>
@@ -155,7 +162,7 @@ else $baseUrl = 'adicionar'; ?>
                                             <?php
                                             $field = 'periodo[]';
                                             $value = set_value($field, reset($periodos['Atual']), FALSE);
-                                            echo form_dropdown($field, $periodos, $value, 'tabindex="-1" class="custom-select mr-sm-2" required');
+                                            echo form_dropdown($field, $periodos, $value, 'class="custom-select mr-sm-2" required');
                                             ?>
                                             <div class="invalid-feedback">
                                                 Período é obrigatório
@@ -174,10 +181,11 @@ else $baseUrl = 'adicionar'; ?>
                                             <input type="text" class="form-control" id="professor" name="professor[]">
                                         </div>
                                     </div>
+                                    <?= view('licenciandos/componentes/situacao_setor', ['novoVinculo' => true]) ?>
                                 </div>
                             </div>
                         <?php else : ?>
-                            <div class="row">
+                            <div class="row js-vinculo">
                                 <div class="col-md-4 pr-1">
                                     <div class="form-group">
                                         <label for="data_cadastro">Data de cadastro:</label>
@@ -202,7 +210,7 @@ else $baseUrl = 'adicionar'; ?>
                                         <?php
                                         $field = 'periodo';
                                         $value = set_value($field, isset($licenciando) ? $setor_data['periodo'] : '', FALSE);
-                                        echo form_dropdown($field, $periodos, $value, 'tabindex="-1" class="custom-select mr-sm-2" required');
+                                        echo form_dropdown($field, $periodos, $value, 'class="custom-select mr-sm-2" required');
                                         ?>
                                         <div class="invalid-feedback">
                                             Período é obrigatório
@@ -221,6 +229,7 @@ else $baseUrl = 'adicionar'; ?>
                                         <input type="text" class="form-control" value="<?= isset($setor_data['professor']) ? $setor_data['professor'] : set_value('professor') ?>" name="professor">
                                     </div>
                                 </div>
+                                <?= view('licenciandos/componentes/situacao_setor', ['novoVinculo' => false, 'setor_data' => $setor_data]) ?>
                             </div>
                             <div class="row">
                                 <div class="col-md-12">
@@ -253,21 +262,24 @@ else $baseUrl = 'adicionar'; ?>
                                 </div>
                             </div>
                         <?php endif ?>
+                        </fieldset>
+                        <fieldset class="licenciando-section">
+                            <legend class="licenciando-section-title"><i class="bx bx-notepad" aria-hidden="true"></i> Observações</legend>
                         <div class="row">
                             <div class="col-md-12">
                                 <div class="form-group">
-                                    <label>Observação</label>
-                                    <textarea class="form-control textarea" style="height:150px;" name="observacao"><?= isset($licenciando['observacao']) ? $licenciando['observacao'] : set_value('observacao') ?></textarea>
+                                    <label for="observacao">Observação</label>
+                                    <textarea class="form-control textarea" rows="4" name="observacao"><?= isset($licenciando['observacao']) ? $licenciando['observacao'] : set_value('observacao') ?></textarea>
                                 </div>
                             </div>
                         </div>
+                        </fieldset>
                         <input type="hidden" name="licenciando_id" value="<?= isset($licenciando['licenciando_id']) ? $licenciando['licenciando_id'] : set_value('licenciando_id') ?>">
                         <input type="hidden" name="endereco_id" value="<?= isset($licenciando['endereco_id']) ? $licenciando['endereco_id'] : set_value('endereco_id') ?>">
                         <input type="hidden" name="licenciandoSetor_id" value="<?= isset($licenciandoSetor_id) ? $licenciandoSetor_id : set_value('licenciandoSetor_id') ?>">
-                        <div class="row">
-                            <div class="update ml-auto mr-auto">
-                                <input type="submit" name="submit" class="btn btn-primary btn-round" value="<?= isset($licenciando) ? 'Atualizar' : 'Adicionar' ?>">
-                            </div>
+                        <div class="licenciando-form-actions">
+                            <a href="<?= base_url('licenciandos') ?>" class="licenciando-back"><i class="bx bx-arrow-back" aria-hidden="true"></i> Voltar para a lista</a>
+                            <button type="submit" name="submit" class="btn btn-primary btn-round"><i class="bx bx-check" aria-hidden="true"></i> <?= isset($licenciando) ? 'Atualizar cadastro' : 'Cadastrar licenciando' ?></button>
                         </div>
                     </form>
                 </div>
@@ -275,3 +287,5 @@ else $baseUrl = 'adicionar'; ?>
         </div>
     </div>
 </div>
+<script src="<?= base_url('public/assets/js/situacao-setor.js') . '?v=' . filemtime(FCPATH . 'public/assets/js/situacao-setor.js') ?>"></script>
+<script src="<?= base_url('public/assets/js/licenciando-form.js') . '?v=' . filemtime(FCPATH . 'public/assets/js/licenciando-form.js') ?>"></script>

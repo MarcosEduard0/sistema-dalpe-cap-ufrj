@@ -13,7 +13,7 @@ Este é um sistema para administrar alunos que estão fazendo estágio para ser 
 
 É baseado na web - PHP e MySQL - e atualmente usa o framework CodeIgniter 4.
 
-### Documentation
+### Documentação
 
 The [User Guide](https://codeigniter4.github.io/userguide/) is the primary documentation for CodeIgniter 4.
 
@@ -31,6 +31,7 @@ PHP version 7.3 or higher is required, with the following extensions installed:
 - [intl](http://php.net/manual/en/intl.requirements.php)
 - [libcurl](http://php.net/manual/en/curl.requirements.php) if you plan to use the HTTP\CURLRequest library
 - [mbstring](http://php.net/manual/en/mbstring.installation.php)
+- [gd](https://www.php.net/manual/en/book.image.php)
 
 Additionally, make sure that the following extensions are enabled in your PHP:
 

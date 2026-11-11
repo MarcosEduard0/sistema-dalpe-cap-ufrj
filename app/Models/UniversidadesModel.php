@@ -13,6 +13,13 @@ class UniversidadesModel extends Model
     protected $allowedFields = ['sigla', 'nome'];
 
     //metodo GET
+    public function getUniversidadesComTotais()
+    {
+        return $this->select('universidades.universidade_id, universidades.sigla, universidades.nome, COUNT(licenciandos.licenciando_id) AS total_licenciandos')
+            ->join('licenciandos', 'licenciandos.universidade_id = universidades.universidade_id', 'left')
+            ->groupBy(['universidades.universidade_id', 'universidades.sigla', 'universidades.nome'])->findAll();
+    }
+
     public function getUniversidades($id = false)
     {
         if ($id === false)

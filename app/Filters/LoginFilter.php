@@ -20,8 +20,8 @@ class LoginFilter implements FilterInterface
     {
         helper('MY_html_helper');
 
-        if (!session()->logged_in) {
-            session()->setFlashdata('msg', msgbox('danger', 'Você precisa esta autenticado para acessar essa pagina.'));
+        if (!session()->get('logged_in')) {
+            session()->setFlashdata('msg', msgbox('danger', 'Você precisa estar autenticado para acessar essa página.'));
             return redirect('login');
         }
     }
@@ -35,6 +35,6 @@ class LoginFilter implements FilterInterface
      */
     public function after(RequestInterface $request, ResponseInterface $response, $arguments = null)
     {
-        // ...
+        // Nada aqui normalmente
     }
 }

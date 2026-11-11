@@ -1,61 +1,42 @@
-<div class="col-md-12">
-    <div class="credits ml-auto" role="toolbar" aria-label="Toolbar with button groups">
-        <a class="btn btn-primary" href="<?= base_url('/licenciandos/adicionar') ?>" role="button">Adicionar</a>
-        <a class="btn btn-secondary" href="<?= base_url('/licenciandos/importar') ?>" role="button">Importar</a>
-    </div>
-    <div class="card">
-        <div class="card-body">
-            <div class="">
-                <table id="tabela" class="table table-striped table-bordered" style="width:100%">
-                    <thead>
-                        <tr>
-                            <th>Nome</th>
-                            <th>DRE</th>
-                            <th>Universidade</th>
-                            <th>Setor Curricular</th>
-                            <th>Ações</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <?php if (!empty($licenciandos) && is_array($licenciandos)) : ?>
-                            <?php foreach ($licenciandos as $licenciando) : ?>
-                                <tr>
-                                    <td><?= $licenciando['nome_completo'] ?></td>
-                                    <td><?= $licenciando['dre'] ?></td>
-                                    <td><?= (isset($licenciando['sigla_universidade'])) ? $licenciando['sigla_universidade'] : 'Nenhuma'  ?></td>
-                                    <td><?= $licenciando['setores'] ?></td>
-                                    <td class="text-center" style="color: white;">
-                                        <div class="actions">
-                                            <a href="<?= base_url('/licenciandos/editar/' . $licenciando["licenciando_id"]) . '/' . $licenciando['setores_id'] ?>"><i class='bx bxs-edit'></i></a>
-                                            <a id="<?= $licenciando['licenciando_id'] ?>" type="button" data-toggle="modal" data-target="#exampleModal" onclick="deleteModal(this.id)" data-detalhes='<?= json_encode($licenciando) ?>'><i class='bx bxs-trash-alt'></i></a>
-                                        </div>
-                                    </td>
-                                </tr>
-                            <?php endforeach; ?>
-                        <?php endif; ?>
-                    </tbody>
-                </table>
-            </div>
-        </div>
-    </div>
-</div>
-
-<div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered" role="document">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="exampleModalLabel">Deletar Licenciando</h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">×</span>
-                </button>
-            </div>
-            <div class="modal-body" style="text-align: center;">
-                <p> Você tem certeza que deseja deletar o licenciando <br><strong id="nome"></strong>?</p>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-primary" data-dismiss="modal">Fechar</button>
-                <a type="button" href="#" id="confirmDelete" class="btn btn-danger">Deletar</a>
-            </div>
-        </div>
-    </div>
-</div>
+<?php
+$numeroLic = static function ($valor) { return number_format((int) $valor, 0, ',', '.'); };
+$percentLic = static function ($valor, $total) { return number_format($total ? 100 * $valor / $total : 0, 1, ',', '.'); };
+$rotulosLic = \App\Models\LicenciandoSetorModel::SITUACOES + ['nao_informado' => 'Não informado'];
+$classesLic = ['Ativo' => 'ativo', 'Inativo' => 'inativo', 'Pendente' => 'pendente', 'Concluido' => 'concluido', 'nao_informado' => 'unknown'];
+?>
+<link rel="stylesheet" href="<?= base_url('public/assets/css/licenciandos-lista.css') . '?v=' . filemtime(FCPATH . 'public/assets/css/licenciandos-lista.css') ?>">
+<main class="licenciandos-lista" aria-labelledby="lic-list-title"><h1 id="lic-list-title" class="sr-only">Licenciandos e estágios</h1>
+    <section class="lic-list-stats" aria-label="Indicadores gerais da base">
+        <article class="lic-list-card lic-list-stat"><span class="lic-stat-icon"><i class="bx bx-group" aria-hidden="true"></i></span><div><h2>Total de licenciandos</h2><strong><?= $numeroLic($resumo['pessoas']) ?></strong><small>Pessoas cadastradas</small></div></article>
+        <article class="lic-list-card lic-list-stat"><span class="lic-stat-icon"><i class="bx bx-check-circle" aria-hidden="true"></i></span><div><h2>Vínculos concluídos</h2><strong><?= $numeroLic($resumo['concluidos']) ?></strong><small><?= $percentLic($resumo['concluidos'], $resumo['vinculos']) ?>% de <?= $numeroLic($resumo['vinculos']) ?> vínculos</small></div></article>
+        <article class="lic-list-card lic-list-stat"><span class="lic-stat-icon"><i class="bx bx-time-five" aria-hidden="true"></i></span><div><h2>Vínculos ativos</h2><strong><?= $numeroLic($resumo['ativos']) ?></strong><small><?= $percentLic($resumo['ativos'], $resumo['vinculos']) ?>% de <?= $numeroLic($resumo['vinculos']) ?> vínculos</small></div></article>
+        <article class="lic-list-card lic-list-stat lic-stat-warning"><span class="lic-stat-icon"><i class="bx bx-error" aria-hidden="true"></i></span><div><h2>Cadastros com pendências</h2><strong><?= $numeroLic($resumo['pendencias']) ?></strong><small><?= $percentLic($resumo['pendencias'], $resumo['pessoas']) ?>% das pessoas cadastradas</small></div></article>
+    </section>
+    <p class="lic-stats-note">Indicadores gerais da base. Um licenciando pode ter situações diferentes por setor. Pendências de cadastro: instituição ou setor sem referência válida, ou e-mail ausente.</p>
+    <section class="lic-list-card lic-filters" aria-labelledby="lic-filters-title"><div class="lic-filters-heading"><h2 id="lic-filters-title"><i class="bx bx-filter-alt" aria-hidden="true"></i> Filtros</h2><button type="button" id="lic-clear-filters" disabled><i class="bx bx-reset" aria-hidden="true"></i> Limpar filtros</button></div><div class="lic-filter-grid">
+        <div><label for="lic-university">Universidade</label><select id="lic-university" disabled><option value="">Todas</option><?php foreach ($universidadesFiltro as $universidade): ?><option value="<?= (int) $universidade['universidade_id'] ?>"><?= esc($universidade['sigla']) ?></option><?php endforeach ?><option value="sem">Sem universidade válida</option></select></div>
+        <div><label for="lic-sector">Setor curricular</label><select id="lic-sector" disabled><option value="">Todos</option><?php foreach ($setoresFiltro as $setor): ?><option value="<?= (int) $setor['setor_id'] ?>"><?= esc($setor['nome']) ?></option><?php endforeach ?></select></div>
+        <div><label for="lic-status">Situação do vínculo</label><select id="lic-status" disabled><option value="">Todas</option><?php foreach ($rotulosLic as $valor => $rotulo): ?><option value="<?= esc($valor) ?>"><?= esc($rotulo) ?></option><?php endforeach ?><option value="sem_vinculo">Sem vínculo com setor</option></select></div>
+        <div><label for="lic-search">Buscar licenciando</label><div class="lic-search-input"><i class="bx bx-search" aria-hidden="true"></i><input type="search" id="lic-search" placeholder="Nome, DRE ou setor..." autocomplete="off" disabled></div></div>
+    </div><p class="lic-filter-note">Ao combinar setor e situação, os dois filtros se aplicam ao mesmo vínculo.</p></section>
+    <div class="lic-list-actions"><a class="lic-primary" href="<?= base_url('licenciandos/adicionar') ?>"><i class="bx bx-plus" aria-hidden="true"></i> Adicionar licenciando</a><a class="lic-secondary" href="<?= base_url('licenciandos/importar') ?>"><i class="bx bx-upload" aria-hidden="true"></i> Importar</a><button type="button" id="lic-export" class="lic-secondary" title="Exportar as colunas da tabela para consulta, considerando os filtros atuais" disabled><i class="bx bx-download" aria-hidden="true"></i> Exportar CSV</button><span id="lic-export-status" class="sr-only" role="status"></span></div>
+    <section class="lic-list-card lic-table-card" aria-label="Lista de licenciandos"><div class="lic-table-scroll" role="region" aria-label="Tabela de licenciandos" tabindex="0"><table id="licenciandos-table" class="lic-list-table"><thead><tr><th scope="col">Nome</th><th scope="col">DRE</th><th scope="col">Universidade</th><th scope="col">Setor curricular</th><th scope="col">Situação por setor</th><th scope="col">Ações</th></tr></thead><tbody>
+        <?php foreach ($licenciandos as $licenciando):
+            $linksLic = [];
+            foreach ($licenciando['vinculos'] as $vinculo) $linksLic[] = ['id' => (int) $vinculo['id'], 'setor_id' => (int) $vinculo['setor_id'], 'nome' => $vinculo['nome'], 'periodo' => $vinculo['periodo'] ?? '', 'situacao' => $vinculo['situacao'] ?: 'nao_informado'];
+            $metaLic = ['id' => (int) $licenciando['licenciando_id'], 'nome' => $licenciando['nome_completo'], 'dre' => (string) $licenciando['dre'], 'universidade' => $licenciando['sigla_universidade'] ?: 'Sem universidade', 'universidade_id' => $licenciando['universidade_valida_id'] ? (string) $licenciando['universidade_valida_id'] : 'sem', 'vinculos' => $linksLic];
+            $primeiroVinculo = $linksLic[0]['id'] ?? null;
+            $urlEditarLic = $primeiroVinculo ? base_url('licenciandos/editar/' . $metaLic['id'] . '/' . $primeiroVinculo) : '';
+            $partesNomeLic = preg_split('/\s+/', trim($licenciando['nome_completo']));
+            $iniciaisLic = mb_strtoupper(mb_substr($partesNomeLic[0] ?? '', 0, 1) . (count($partesNomeLic) > 1 ? mb_substr(end($partesNomeLic), 0, 1) : ''));
+        ?>
+        <tr data-student="<?= esc(json_encode($metaLic, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT)) ?>"><td data-order="<?= esc($licenciando['nome_completo']) ?>" data-search="<?= esc($licenciando['nome_completo']) ?>"><div class="lic-person-name"><span class="lic-avatar" aria-hidden="true"><?= esc($iniciaisLic ?: '?') ?></span><button type="button" class="lic-open-summary" disabled><?= esc($licenciando['nome_completo']) ?></button></div></td><td><?= esc($licenciando['dre']) ?></td><td><?= esc($metaLic['universidade']) ?></td><td><?= esc(implode(', ', array_unique(array_column($linksLic, 'nome'))) ?: 'Sem vínculo') ?></td><td><div class="lic-link-statuses">
+            <?php foreach ($linksLic as $linkLic): ?><a class="lic-status-badge lic-status-<?= esc($classesLic[$linkLic['situacao']]) ?>" href="<?= base_url('licenciandos/editar/' . $metaLic['id'] . '/' . $linkLic['id']) ?>" title="<?= esc('Editar vínculo de ' . $linkLic['nome']) ?>"><i class="bx <?= $linkLic['situacao'] === 'Concluido' ? 'bx-check-circle' : ($linkLic['situacao'] === 'Pendente' ? 'bx-error-circle' : 'bx-circle') ?>" aria-hidden="true"></i><?= esc($linkLic['nome'] . ($linkLic['periodo'] ? ' (' . $linkLic['periodo'] . ')' : '') . ': ' . $rotulosLic[$linkLic['situacao']]) ?></a><?php endforeach ?>
+            <?php if (!$linksLic): ?><span class="lic-status-badge lic-status-unknown">Sem vínculo</span><?php endif ?>
+        </div></td><td><div class="lic-row-actions"><button type="button" class="lic-action lic-open-summary" title="Visualizar resumo" aria-label="<?= esc('Visualizar ' . $licenciando['nome_completo']) ?>" disabled><i class="bx bx-show" aria-hidden="true"></i></button><?php if ($urlEditarLic): ?><a class="lic-action" href="<?= esc($urlEditarLic) ?>" title="Editar cadastro" aria-label="<?= esc('Editar ' . $licenciando['nome_completo']) ?>"><i class="bx bx-edit-alt" aria-hidden="true"></i></a><?php else: ?><button class="lic-action" type="button" disabled title="Nenhum vínculo disponível para edição" aria-label="Edição indisponível: nenhum vínculo"><i class="bx bx-edit-alt" aria-hidden="true"></i></button><?php endif ?><button type="button" class="lic-action lic-delete" data-delete-url="<?= base_url('licenciandos/excluir/' . $metaLic['id']) ?>" title="Excluir cadastro" aria-label="<?= esc('Excluir ' . $licenciando['nome_completo']) ?>" disabled><i class="bx bx-trash" aria-hidden="true"></i></button></div></td></tr>
+        <?php endforeach ?>
+    </tbody></table></div><div class="lic-list-footer"><p id="lic-results" role="status"><?= $numeroLic(count($licenciandos)) ?> licenciandos cadastrados</p><div class="lic-pagination-tools"><label for="lic-page-size" class="sr-only">Licenciandos por página</label><select id="lic-page-size" disabled><option value="10">10 por página</option><option value="25">25 por página</option><option value="50">50 por página</option><option value="100">100 por página</option></select><nav class="lic-pagination" aria-label="Páginas da lista"><button type="button" id="lic-previous" disabled>Anterior</button><span id="lic-pages"></span><button type="button" id="lic-next" disabled>Próximo</button></nav></div></div></section>
+    <dialog id="lic-summary-dialog" class="lic-list-dialog" aria-labelledby="lic-summary-title"><div class="lic-dialog-heading"><h2 id="lic-summary-title">Resumo do licenciando</h2><button type="button" data-close-dialog aria-label="Fechar resumo"><i class="bx bx-x" aria-hidden="true"></i></button></div><h3 id="lic-summary-name"></h3><dl class="lic-summary-data"><div><dt>DRE</dt><dd id="lic-summary-dre"></dd></div><div><dt>Universidade</dt><dd id="lic-summary-university"></dd></div></dl><h4>Vínculos e situações</h4><ul id="lic-summary-links"></ul><div class="lic-dialog-actions"><button type="button" data-close-dialog>Fechar</button><a id="lic-summary-edit" class="lic-primary">Editar cadastro</a></div></dialog>
+    <dialog id="lic-delete-dialog" class="lic-list-dialog" aria-labelledby="lic-delete-title" aria-describedby="lic-delete-description"><div class="lic-delete-icon"><i class="bx bx-trash" aria-hidden="true"></i></div><h2 id="lic-delete-title">Excluir licenciando?</h2><p id="lic-delete-description">O cadastro de <strong id="lic-delete-name"></strong> e seus vínculos com setores serão removidos.</p><p class="lic-delete-warning">Esta ação não pode ser desfeita.</p><form id="lic-delete-form" method="post"><?= csrf_field() ?><div class="lic-dialog-actions"><button type="button" id="lic-delete-cancel">Cancelar</button><button type="submit" class="lic-confirm-delete">Excluir cadastro</button></div></form></dialog>
+</main>
+<script src="<?= base_url('public/assets/js/licenciandos-lista.js') . '?v=' . filemtime(FCPATH . 'public/assets/js/licenciandos-lista.js') ?>"></script>

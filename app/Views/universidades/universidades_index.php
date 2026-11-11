@@ -1,57 +1,26 @@
-<div class="col-md-12">
-    <div class="credits ml-auto" role="toolbar" aria-label="Toolbar with button groups">
-        <a class="btn btn-primary" href="<?= base_url('/universidades/adicionar') ?>" role="button">Adicionar</a>
-    </div>
-    <div class="card">
-        <div class="card-body">
-            <div class="">
-                <table id="tabela" class="table table-striped table-bordered" style="width:100%">
-                    <thead>
-                        <tr>
-                            <th>Sigla</th>
-                            <th>Nome</th>
-                            <th>Ações</th>
-                        </tr>
-                    </thead>
-                    <tbody id="myTable">
-                        <?php if (!empty($universidades) && is_array($universidades)) : ?>
-
-                            <?php foreach ($universidades as $universidade) : ?>
-                                <tr>
-                                    <td><?= $universidade['sigla'] ?></td>
-                                    <td><?= $universidade['nome'] ?></td>
-                                    <td class="text-center">
-                                        <div class="actions">
-                                            <a href="<?= base_url('/universidades/editar/' . $universidade['universidade_id']) ?>"><i class='bx bxs-edit'></i></a>
-                                            <a id="<?= $universidade['universidade_id'] ?>" type="button" data-toggle="modal" data-target="#exampleModal" onclick="deleteModal(this.id)" data-detalhes='<?= json_encode($universidade) ?>'><i class='bx bxs-trash-alt'></i></a>
-                                        </div>
-                                    </td>
-                                </tr>
-                            <?php endforeach; ?>
-                        <?php endif; ?>
-                    </tbody>
-                </table>
-            </div>
-        </div>
-    </div>
-</div>
-
-<div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered" role="document">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="exampleModalLabel">Deletar Universidade</h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">×</span>
-                </button>
-            </div>
-            <div class="modal-body" style="text-align: center;">
-                <p> Você tem certeza que deseja deletar a universidade <br><strong id="nome"></strong>?</p>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-primary" data-dismiss="modal">Fechar</button>
-                <a type="button" href="#" id="confirmDelete" class="btn btn-danger">Deletar</a>
-            </div>
-        </div>
-    </div>
-</div>
+<?php
+$totalUniversidades = count($universidades);
+$comLicenciandos = count(array_filter($universidades, static function ($item) { return (int) $item['total_licenciandos'] > 0; }));
+$totalVinculados = array_sum(array_column($universidades, 'total_licenciandos'));
+$numeroUni = static function ($valor) { return number_format((int) $valor, 0, ',', '.'); };
+?>
+<link rel="stylesheet" href="<?= base_url('public/assets/css/universidades-lista.css') . '?v=' . filemtime(FCPATH . 'public/assets/css/universidades-lista.css') ?>">
+<main class="universidades-page" aria-labelledby="uni-title">
+    <section class="uni-banner"><span class="uni-banner-icon"><i class="bx bxs-institution" aria-hidden="true"></i></span><div><h1 id="uni-title">Universidades</h1><p>Gerencie as instituições cadastradas e consulte seus licenciandos.</p></div></section>
+    <section class="uni-overview" aria-label="Resumo das universidades">
+        <article class="uni-card uni-stat"><span class="uni-stat-icon"><i class="bx bxs-institution" aria-hidden="true"></i></span><div><h2>Total de universidades</h2><strong><?= $numeroUni($totalUniversidades) ?></strong></div></article>
+        <article class="uni-card uni-stat"><span class="uni-stat-icon"><i class="bx bx-group" aria-hidden="true"></i></span><div><h2>Com licenciandos</h2><strong><?= $numeroUni($comLicenciandos) ?></strong></div></article>
+        <article class="uni-card uni-stat"><span class="uni-stat-icon"><i class="bx bxs-graduation" aria-hidden="true"></i></span><div><h2>Licenciandos vinculados</h2><strong><?= $numeroUni($totalVinculados) ?></strong></div></article>
+        <article class="uni-card uni-overview-note"><i class="bx bx-info-circle" aria-hidden="true"></i><p>As quantidades contam pessoas, independentemente do número de setores em que atuam.</p></article>
+    </section>
+    <section class="uni-card uni-list" aria-label="Lista de universidades"><div class="uni-toolbar"><a class="uni-primary" href="<?= base_url('universidades/adicionar') ?>"><i class="bx bx-plus" aria-hidden="true"></i> Adicionar universidade</a><div class="uni-search"><i class="bx bx-search" aria-hidden="true"></i><label class="sr-only" for="uni-search">Pesquisar por sigla ou nome</label><input id="uni-search" type="search" placeholder="Pesquisar por sigla ou nome..." autocomplete="off" disabled></div></div>
+        <div class="uni-table-scroll" tabindex="0" role="region" aria-label="Tabela de universidades"><table id="universidades-table" class="uni-table"><thead><tr><th scope="col">Sigla</th><th scope="col">Nome</th><th scope="col">Total de licenciandos</th><th scope="col">Cadastros vinculados</th><th scope="col">Ações</th></tr></thead><tbody>
+            <?php foreach ($universidades as $universidade): $quantUni = (int) $universidade['total_licenciandos']; ?>
+            <tr><td data-search="<?= esc($universidade['sigla']) ?>" data-order="<?= esc($universidade['sigla']) ?>"><a class="uni-abbreviation" href="<?= base_url('universidades/editar/' . (int) $universidade['universidade_id']) ?>"><?= esc($universidade['sigla']) ?></a></td><td><?= esc($universidade['nome']) ?></td><td data-order="<?= $quantUni ?>"><span class="uni-count"><?= $numeroUni($quantUni) ?></span></td><td><span class="uni-link-status <?= $quantUni ? 'uni-with-students' : 'uni-without-students' ?>"><i class="bx <?= $quantUni ? 'bx-check-circle' : 'bx-circle' ?>" aria-hidden="true"></i><?= $quantUni ? 'Com licenciandos' : 'Sem licenciandos' ?></span></td><td><div class="uni-row-actions"><a class="uni-action" href="<?= base_url('universidades/editar/' . (int) $universidade['universidade_id']) ?>" title="Editar universidade" aria-label="<?= esc('Editar ' . $universidade['sigla']) ?>"><i class="bx bx-edit-alt" aria-hidden="true"></i></a><button type="button" class="uni-action uni-delete" <?= $quantUni ? '' : 'data-delete-url="' . esc(base_url('universidades/excluir/' . (int) $universidade['universidade_id'])) . '"' ?> data-university-name="<?= esc($universidade['sigla'] . ' — ' . $universidade['nome']) ?>" title="<?= $quantUni ? 'Possui licenciandos vinculados e não pode ser excluída' : 'Excluir universidade' ?>" aria-label="<?= esc($quantUni ? 'Exclusão indisponível: ' . $universidade['sigla'] . ' possui licenciandos vinculados' : 'Excluir ' . $universidade['sigla']) ?>" disabled><i class="bx bx-trash" aria-hidden="true"></i></button></div></td></tr>
+            <?php endforeach ?>
+        </tbody></table></div>
+        <div class="uni-footer"><p id="uni-results" role="status"><?= $numeroUni($totalUniversidades) ?> universidades cadastradas</p><div class="uni-pagination-tools"><label class="sr-only" for="uni-page-size">Universidades por página</label><select id="uni-page-size" disabled><option value="10">10 por página</option><option value="25">25 por página</option><option value="50">50 por página</option></select><nav class="uni-pagination" aria-label="Páginas da lista"><button type="button" id="uni-previous" disabled>Anterior</button><span id="uni-pages"></span><button type="button" id="uni-next" disabled>Próximo</button></nav></div></div><p class="uni-list-note">Universidades com licenciandos vinculados não podem ser excluídas. Edite o cadastro para corrigir a sigla ou o nome.</p>
+    </section>
+    <dialog id="uni-delete-dialog" class="uni-delete-dialog" aria-labelledby="uni-delete-title" aria-describedby="uni-delete-description"><div class="uni-delete-icon"><i class="bx bx-trash" aria-hidden="true"></i></div><h2 id="uni-delete-title">Excluir universidade?</h2><p id="uni-delete-description">O cadastro de <strong id="uni-delete-name"></strong> será removido.</p><p class="uni-delete-warning">Esta ação não pode ser desfeita.</p><form id="uni-delete-form" method="post"><?= csrf_field() ?><div class="uni-dialog-actions"><button type="button" id="uni-delete-cancel">Cancelar</button><button type="submit" class="uni-confirm-delete">Excluir universidade</button></div></form></dialog>
+</main>
+<script src="<?= base_url('public/assets/js/universidades-lista.js') . '?v=' . filemtime(FCPATH . 'public/assets/js/universidades-lista.js') ?>"></script>

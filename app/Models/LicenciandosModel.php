@@ -16,6 +16,13 @@ class LicenciandosModel extends Model
     ];
 
     //metodo get
+    public function getLicenciandosParaListagem()
+    {
+        return $this->select('licenciandos.licenciando_id, licenciandos.nome_completo, licenciandos.dre, licenciandos.email, licenciandos.universidade_id,
+            universidades.universidade_id AS universidade_valida_id, universidades.sigla AS sigla_universidade')
+            ->join('universidades', 'universidades.universidade_id = licenciandos.universidade_id', 'left')->findAll();
+    }
+
     public function getLicenciandos($id = false)
     {
         if ($id === false)

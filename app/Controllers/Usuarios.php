@@ -22,10 +22,11 @@ class Usuarios extends BaseController
     {
         $this->data = [
             'titulo' => 'Usuários',
-            'usuarios' => $this->usuariosModel->getUsuarios(),
+            'usuarios' => $this->usuariosModel->getUsuariosParaListagem(),
         ];
         $sessionData['posicao'] = 'Usuarios';
-        session()->set($sessionData);
+        if (isset($_COOKIE['ci_session'])) session()->set($sessionData);
+
         $this->data['body'] = view('usuarios/usuarios_index', $this->data);
         return $this->render();
     }
@@ -36,8 +37,9 @@ class Usuarios extends BaseController
      */
     public function editar($id = null)
     {
+        session()->set('posicao', 'Usuarios');
         $this->data = [
-            'titulo' => 'Editar',
+            'titulo' => 'Editar usuário',
             'usuario' => $this->usuariosModel->getUsuarios($id),
         ];
 
@@ -46,7 +48,7 @@ class Usuarios extends BaseController
         }
 
         if ($this->request->getMethod() == 'post') {
-            $this->salvar();
+            $this->salvar($id);
             if (!isset($this->data['validation'])) {
                 session()->setFlashdata('msg', msgbox('success', 'O usuário foi atualizado.'));
                 return redirect()->to('usuarios/editar/' . $id);
@@ -62,7 +64,8 @@ class Usuarios extends BaseController
      */
     public function adicionar()
     {
-        $this->data['titulo'] = 'Adicionar';
+        session()->set('posicao', 'Usuarios');
+        $this->data['titulo'] = 'Adicionar usuário';
 
         if ($this->request->getMethod() == 'post') {
             $this->salvar();
@@ -76,123 +79,97 @@ class Usuarios extends BaseController
     }
 
     /**
-     * página de login
-     *
-     */
-    public function login_index()
-    {
-        if (session()->logged_in) {
-            return redirect()->to('licenciandos');
-        }
-        $this->data['titulo'] = 'Login';
-        $this->data['body'] = view('login/login_index', $this->data);
-        return $this->render();
-    }
-
-    /**
      * Salva os dados do usuario
      *
      */
-    public function salvar()
+    public function salvar($idRota = null)
     {
-        $usuarioId = $this->request->getVar('usuario_id');
-        $assinatura = $this->request->getFile('assinatura');
-        $usuarioNovo = $this->request->getVar('usuario');
-        $siapeNovo = $this->request->getVar('siape');
-        $cargoNovo = $this->request->getVar('cargo');
+        $usuarioId = $this->request->getPost('usuario_id');
+        if ($idRota !== null && (string) $usuarioId !== (string) $idRota) {
+            throw new \CodeIgniter\Exceptions\PageNotFoundException();
+        }
+        $atual = $usuarioId ? $this->usuariosModel->find($usuarioId) : null;
+        if ($usuarioId && !$atual) throw new \CodeIgniter\Exceptions\PageNotFoundException();
+        $arquivo = $this->request->getFile('assinatura');
+        $temArquivo = $arquivo && $arquivo->getError() !== UPLOAD_ERR_NO_FILE;
+        $remover = (bool) $this->request->getPost('deleteAssinatura');
+        $login = $this->request->getPost('usuario');
+        $siape = $this->request->getPost('siape');
+        $senha1 = $this->request->getPost('senha1') ?? '';
+        $senha2 = $this->request->getPost('senha2') ?? '';
 
-
-        $this->validation->setRule('usuario', 'Usuário', 'required|min_length[3]|max_length[50]|is_unique[usuarios.usuario]');
-        $this->validation->setRule('siape', 'Siape', 'min_length[3]|max_length[8]|is_unique[usuarios.siape]');
-        $this->validation->setRule('nome_completo', 'Nome Completo', 'required|min_length[3]|max_length[50]');
-        $this->validation->setRule('cargo', 'Cargo', 'min_length[3]|max_length[50]');
-
-        if (empty($usuarioId)) {
+        $regraLogin = 'required|min_length[3]|max_length[50]|regex_match[/^[A-Za-z0-9-_.@]+$/]';
+        if (!$atual || (string) $atual['usuario'] !== (string) $login) $regraLogin .= '|is_unique[usuarios.usuario]';
+        $regraSiape = 'required|min_length[3]|max_length[8]|integer';
+        if (!$atual || (string) $atual['siape'] !== (string) $siape) $regraSiape .= '|is_unique[usuarios.siape]';
+        $this->validation->setRules([
+            'usuario' => ['label' => 'Usuário', 'rules' => $regraLogin],
+            'siape' => ['label' => 'SIAPE', 'rules' => $regraSiape],
+            'nome_completo' => ['label' => 'Nome completo', 'rules' => 'required|min_length[3]|max_length[50]'],
+            'nome_social' => ['label' => 'Nome social', 'rules' => 'permit_empty|max_length[255]'],
+            'cargo' => ['label' => 'Cargo', 'rules' => 'required|min_length[3]|max_length[50]'],
+            'authlevel' => ['label' => 'Tipo de usuário', 'rules' => 'required|in_list[0,1]'],
+            'email' => ['label' => 'E-mail', 'rules' => 'permit_empty|valid_email|max_length[255]'],
+            'telefone' => ['label' => 'Telefone', 'rules' => 'permit_empty|max_length[255]'],
+        ]);
+        if (!$atual || $senha1 !== '' || $senha2 !== '') {
             $this->validation->setRule('senha1', 'Senha', 'trim|required|min_length[3]|matches[senha2]');
-            $this->validation->setRule('senha2', 'Senha (novamente)', 'trim|min_length[3]');
-        } else {
-            $usuario = $this->usuariosModel->getUsuarios($usuarioId);
-            $usuarioAntigo = $usuario['usuario'];
-            $siapeAntigo = $usuario['siape'];
-
-            if (!strcmp($usuarioAntigo, $usuarioNovo)) {
-                $this->validation->setRule('usuario', 'Usuário', 'required|max_length[32]|regex_match[/^[A-Za-z0-9-_.@]+$/]');
-            }
-            if (!strcmp($siapeAntigo, $siapeNovo)) {
-                $this->validation->setRule('siape', 'Siape', 'min_length[3]|max_length[8]');
-            }
-            if ($this->request->getVar('senha1')) {
-                $this->validation->setRule('senha1', 'Senha', 'trim|required|min_length[3]|matches[senha2]');
-                $this->validation->setRule('senha2', 'Senha (novamente)', 'trim|min_length[3]');
-            }
+            $this->validation->setRule('senha2', 'Confirmar senha', 'trim|required|min_length[3]');
         }
-
-        $dataUser = [
-            'usuario_id' =>  $usuarioId,
-            'usuario' => $usuarioNovo,
-            'nome_completo' => $this->request->getVar('nome_completo'),
-            'nome_social' => $this->request->getVar('nome_social'),
-            'siape' => $siapeNovo,
-            'cargo' => $cargoNovo,
-            'email' => $this->request->getVar('email'),
-            'telefone' => $this->request->getVar('telefone'),
+        if ($temArquivo) {
+            $this->validation->setRule('assinatura', 'Assinatura', 'uploaded[assinatura]|is_image[assinatura]|mime_in[assinatura,image/jpeg,image/png]|ext_in[assinatura,jpg,jpeg,png]|max_size[assinatura,4096]');
+        }
+        if (!$this->validation->withRequest($this->request)->run()) {
+            $this->data['validation'] = $this->validation;
+            return;
+        }
+        if ($temArquivo && $remover) {
+            $this->validation->setError('assinatura', 'Escolha substituir ou remover a assinatura, uma opção por vez.');
+            $this->data['validation'] = $this->validation;
+            return;
+        }
+        $dados = [
+            'usuario_id' => $usuarioId ?: null, 'usuario' => $login,
+            'nome_completo' => $this->request->getPost('nome_completo'),
+            'nome_social' => $this->request->getPost('nome_social') ?? '',
+            'siape' => $siape, 'cargo' => $this->request->getPost('cargo'),
+            'email' => $this->request->getPost('email') ?? '',
+            'telefone' => $this->request->getPost('telefone') ?? '',
+            'authlevel' => $this->request->getPost('authlevel'),
         ];
-
-        if ($this->request->getVar('senha1') && $this->request->getVar('senha2')) {
-            $dataUser['senha'] = password_hash($this->request->getVar('senha1'), PASSWORD_DEFAULT);
+        if ($senha1 !== '') $dados['senha'] = password_hash($senha1, PASSWORD_DEFAULT);
+        $novoNome = null;
+        try {
+            if ($temArquivo) {
+                $novoNome = bin2hex(random_bytes(16)) . '.' . strtolower($arquivo->getClientExtension());
+                $arquivo->move(FCPATH . 'public/assets/uploads/', $novoNome);
+                $dados['assinatura'] = $novoNome;
+            } elseif ($remover) {
+                $dados['assinatura'] = null;
+            }
+            if (!$this->usuariosModel->save($dados)) throw new \RuntimeException('Falha ao salvar o cadastro.');
+        } catch (\Throwable $erro) {
+            if ($novoNome) $this->apagarAssinatura($novoNome);
+            log_message('error', 'Falha ao salvar usuário: {erro}', ['erro' => $erro->getMessage()]);
+            $this->validation->setError('cadastro', 'Não foi possível salvar o cadastro. Tente novamente.');
+            $this->data['validation'] = $this->validation;
+            return;
         }
-
-
-        //Verificando se o usuario deseja deletar a assinatura atual
-        if ($this->request->getVar('deleteAssinatura')) {
-            $this->apagarAssinatura($usuario['assinatura']);
-            $dataUser['assinatura'] = null;
-            $this->usuariosModel->save($dataUser);
-        } else {
-            //caso contrario, verifique se carregou algum arquivo
-            if (empty($assinatura)) {
-                $this->validate([
-                    'assinatura' => 'uploaded[assinatura]|max_size[assinatura, 4096]|ext_in[assinatura,jpg,png]',
-                ]);
-            }
-            if (!$this->validation->withRequest($this->request)->run()) {
-                $this->data['validation'] = $this->validation;
-            } else {
-
-                if ($file = $this->request->getFile('assinatura')) {
-                    if ($file->isValid()) {
-                        //se o usuario ja possuir assinatura, remova a antiga e coloque a nova
-                        if (!empty($usuario['assinatura'])) {
-                            $this->apagarAssinatura($usuario['assinatura']);
-                            $dataUser['assinatura'] = null;
-                        }
-                        $novoNome = $assinatura->getRandomName();
-                        $file->move('public/assets/uploads/', $novoNome);
-                        $dataUser['assinatura'] = $novoNome;
-                    }
-                    $this->usuariosModel->save($dataUser);
-
-                    //Atualizando dados da sessão
-                    if (!strcmp(session()->get('usuario')['usuario_id'], $usuarioId)) {
-                        $usuario = $this->usuariosModel->getUsuarios($usuarioId);
-                        session()->set('usuario', $usuario);
-                    }
-                } else {
-                    // $this->data['validation'] = $this->validation;
-                    session()->setFlashdata('msg', msgbox('danger', 'A assinatura não pode ser carregada.'));
-                }
-            }
+        // Somente remova a imagem antiga depois que o cadastro foi salvo.
+        if (($temArquivo || $remover) && !empty($atual['assinatura'])) {
+            $this->apagarAssinatura($atual['assinatura']);
+        }
+        if ($usuarioId && (string) (session()->get('usuario')['usuario_id'] ?? '') === (string) $usuarioId) {
+            $sessaoAtual = $this->usuariosModel->find($usuarioId);
+            session()->set(['usuario' => $sessaoAtual, 'authlevel' => $sessaoAtual['authlevel']]);
         }
     }
 
-    /**
-     * Remove o arquivo da assinatura antiga do servidor
-     *
-     */
-    private function apagarAssinatura($name)
+    private function apagarAssinatura($nome)
     {
-        if (file_exists("public/assets/uploads/" . $name))
-            unlink("public/assets/uploads/" . $name);
+        if (!$nome || basename($nome) !== $nome) return;
+        $caminho = FCPATH . 'public/assets/uploads/' . $nome;
+        if (is_file($caminho) && !@unlink($caminho)) log_message('error', 'Não foi possível remover uma assinatura antiga.');
     }
 
     /**
@@ -203,45 +180,21 @@ class Usuarios extends BaseController
     {
         $this->usuariosModel->delete($id);
         session()->setFlashdata('msg', msgbox('success', 'O usuário foi deletado.'));
-        return redirect('usuarios');
+        return redirect()->to('usuarios');
     }
-
-
     /**
-     * Autenticação de usuario
+     * Limpa as sessoes antigas
      *
      */
-    public function login()
+    private function limparSessoesAntigas($minutos = 5)
     {
-        $user = $this->request->getVar('usuario');
-        $senha = $this->request->getVar('senha');
-        $this->data['usuario'] = $this->usuariosModel->getUsuarioByUser($user);
-        session()->markAsFlashdata('msg');
+        $path = WRITEPATH . 'session/';
+        $maxTime = time() - ($minutos * 60);
 
-        if (!empty($this->data['usuario'])) {
-            if (password_verify($senha, $this->data['usuario']['senha'])) {
-                $sessionData = [
-                    'usuario' =>   $this->data['usuario'],
-                    'logged_in' => TRUE,
-                ];
-                session()->set($sessionData);
-
-                $this->usuariosModel->update($this->data['usuario']['usuario_id'], ['ultimo_login'  => utf8_encode(strftime('%Y-%m-%d %H:%M:%S'))]);
-
-                return redirect('home');
+        foreach (glob($path . 'ci_session*') as $file) {
+            if (filemtime($file) < $maxTime) {
+                @unlink($file); // Use @ para ignorar erro se não conseguir apagar
             }
         }
-        session()->setFlashdata('msg', msgbox('danger', 'Usuário e/ou senha incorretos.'));
-        return redirect()->to('login');
-    }
-
-    /**
-     * Logout de usuario
-     *
-     */
-    public function logout()
-    {
-        session()->destroy();
-        return redirect('login');
     }
 }

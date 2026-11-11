@@ -4,7 +4,7 @@
 <head>
 
     <meta http-equiv="Content-Type" content="application/pdf; charset=utf-8" />
-    <title><?= $documento['nome'] ?></title>
+    <title><?= $titulo_documento ?></title>
     <style>
         .titulo {
             text-align: center;
@@ -24,7 +24,7 @@
         }
 
         .data {
-            margin: 10% 9% 10% 9%;
+            /* margin: 10% 9% 10% 9%; */
             text-align: center;
             font-family: Arial;
 
@@ -66,7 +66,7 @@
             bottom: 0;
             left: 0;
             right: 0;
-            background-image: url('public/assets/img/documentos/UFRJ_Vertical_Tela_Positivo.png');
+            background-image: url('public/assets/img/documentos/ufrj.png');
             background-position: center;
             background-repeat: no-repeat;
             background-size: 90%;
@@ -78,16 +78,21 @@
             width: 50px;
         }
     </style>
-
-    <div class="imagem">
-        <img style=" width: auto;height: 100px; padding:20px" src='public/assets/img/documentos/UFRJ.jpg'>
-        <img style=" width: auto; height: 98px;padding:20px" src="public/assets/img/documentos/CAP.jpg">
-        <img style=" width: auto;height: 98px;padding:20px" src='public/assets/img/documentos/SOL.jpg'>
-    </div>
 </head>
 
 <body>
-    <div class="timbrado"></div>
+    <!-- Imagem de fundo (timbrado) -->
+    <div class="timbrado">
+    </div>
+
+    <!-- As 3 imagens do cabeçalho -->
+    <div class="imagem" style="position: relative; z-index: 10;">
+        <?php for ($i = 0; $i < count($cabecalho_imagens); $i++): if (empty($cabecalho_imagens[$i])) continue; ?>
+            <img style="width: auto; height: 100px; padding: 20px;" src="<?= $cabecalho_imagens[$i] ?>">
+        <?php endfor; ?>
+    </div>
+
+    </div>
     <h2 class="titulo"><?= $documento['nome'] ?></h2>
     <div class="conteudo" style="max-width: auto;">
         <span><?= $documento['conteudo'] ?></span>
@@ -97,8 +102,8 @@
     </div>
     <div class="assinatura">
         <b> Direção Adjunta de Licenciatura, Pesquisa e Extensão</b><br>
-        <?= session()->get('usuario')['nome_completo'] ?> | <?= session()->get('usuario')['cargo'] ?> | SIAPE <?= session()->get('usuario')['siape'] ?><br>
-        <img src='public/assets/uploads/<?= session()->get('usuario')['assinatura'] ?>'>
+        <?= $nome_usuario ?> | <?= $cargo ?> | SIAPE <?= $siape ?><br>
+        <img src='public/assets/uploads/<?= $assinatura ?>'>
     </div>
 
     <div class="footer">

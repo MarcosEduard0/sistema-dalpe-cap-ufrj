@@ -1,133 +1,33 @@
-<?php if (isset($usuario)) $baseUrl = 'editar/' . $usuario['usuario_id'];
-else $baseUrl = 'adicionar'; ?>
-
-<form class="needs-validation" novalidate action="<?= base_url('/usuarios/' . $baseUrl) ?>" method="post" enctype="multipart/form-data">
-    <div class="content">
-        <div class="row">
-            <div class="col-md-8">
-                <div class="card card-user">
-                    <div class="card-header">
-                        <?= (isset($validation)) ? $validation->listErrors() : '' ?>
-                        <!-- <h5 class="card-title"></h5> -->
-                    </div>
-                    <div class="card-body">
-                        <div class="row">
-                            <div class="col-md-4 pr-1">
-                                <div class="form-group">
-                                    <label for="usuario">Usuário</label>
-                                    <input type="text" class="form-control" value="<?= isset($usuario['usuario']) ? $usuario['usuario'] : set_value('usuario') ?>" name="usuario" required>
-                                    <div class="invalid-feedback">
-                                        Usuário é obrigatório
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col-md-4 px-1">
-                                <div class="form-group">
-                                    <label for="senha1">Senha</label>
-                                    <?php (!isset($usuario['usuario_id']) ? $required = 'required' : $required = '') ?>
-                                    <input type="password" class="form-control" value="" name="senha1" <?= $required ?>>
-                                    <div class="invalid-feedback">
-                                        Senha é obrigatório
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col-md-4 pl-1">
-                                <div class="form-group">
-                                    <label for="senha2">Senha (novamente)</label>
-                                    <input type="password" class="form-control" value="" name="senha2" <?= $required ?>>
-                                    <div class="invalid-feedback">
-                                        Confirmar senha é obrigatório
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="row">
-                            <div class="col-md-6 pr-1">
-                                <div class="form-group">
-                                    <label for="nome_completo">Nome Completo</label>
-                                    <input type="text" class="form-control" name="nome_completo" value="<?= isset($usuario['nome_completo']) ? $usuario['nome_completo'] : set_value('nome_completo') ?>" required>
-                                    <div class="invalid-feedback">
-                                        Nome Completo é obrigatório
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col-md-6 pl-1">
-                                <div class="form-group">
-                                    <label for="nome_social">Nome Social</label>
-                                    <input type="text" class="form-control" name="nome_social" value="<?= isset($usuario['nome_social']) ? $usuario['nome_social'] : set_value('nome_social') ?>">
-                                </div>
-                            </div>
-
-                        </div>
-                        <div class="row">
-                            <div class="col-md-2 pr-1">
-                                <div class="form-group">
-                                    <label for="siape">Siape</label>
-                                    <input type="text" class="form-control" value="<?= isset($usuario['siape']) ? $usuario['siape'] : set_value('siape') ?>" name="siape" required>
-                                    <div class="invalid-feedback">
-                                        Siape é obrigatório
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col-md-4 px-1">
-                                <div class="form-group">
-                                    <label for="cargo">Cargo</label>
-                                    <input type="text" class="form-control" value="<?= isset($usuario['cargo']) ? $usuario['cargo'] : set_value('cargo') ?>" name="cargo" required>
-                                    <div class="invalid-feedback">
-                                        Cargo é obrigatório
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col-md-4 px-1">
-                                <div class="form-group">
-                                    <label for="email">Email</label>
-                                    <input type="text" class="form-control" value="<?= isset($usuario['email']) ? $usuario['email'] : set_value('email') ?>" name="email">
-                                </div>
-                            </div>
-                            <div class="col-md-2 pl-1">
-                                <div class="form-group">
-                                    <label for="telefone">Telefone </label>
-                                    <input type="text" class="form-control" value="<?= isset($usuario['telefone']) ? $usuario['telefone'] : set_value('telefone') ?>" name="telefone" onkeypress="$(this).mask('(00) 0000-00000')">
-                                </div>
-                            </div>
-                        </div>
-                        <input type="hidden" name="usuario_id" value="<?= isset($usuario['usuario_id']) ? $usuario['usuario_id'] : set_value('usuario_id') ?>">
-                        <div class="row">
-                            <div class="update ml-auto mr-auto">
-                                <input type="submit" name="submit" class="btn btn-primary btn-round" value="<?= isset($usuario) ? 'Atualizar' : 'Adicionar' ?>">
-                            </div>
-                        </div>
-
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-4">
-                <div class="card card-user">
-                    <div class="card-body">
-                        <div class="text-center">
-                            <label class=newbtn>
-                                <img id="imgLicen" class="assinatura img" src="<?= isset($usuario['assinatura']) ? base_url("public/assets/uploads/" . $usuario['assinatura']) : base_url("public/assets/img/no-img.jpg") ?>">
-                                <input type="file" id="filImage" name="assinatura" accept="image/*">
-                            </label>
-                        </div>
-                    </div>
-                    <div class="card-footer">
-                        <hr>
-                        <div class="button-container">
-                            <div class="row" style="justify-content: center;">
-                                <?php if (isset($usuario)) : ?>
-                                    <div class="custom-control custom-switch">
-                                        <input type="checkbox" class="custom-control-input" name="deleteAssinatura" id="deleteAssinatura">
-                                        <label class="custom-control-label" for="deleteAssinatura">Deletar Assinatura Atual</label>
-                                    </div>
-                                <?php else : ?>
-                                    <strong><label>Usuário sem assinatura</label></strong>
-                                <?php endif ?>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-</form>
+<?php
+$editandoUsuario = isset($usuario);
+$cadastroUsuario = $usuario ?? [];
+$baseUrl = $editandoUsuario ? 'editar/' . (int) $usuario['usuario_id'] : 'adicionar';
+$campoUsuario = static function ($campo, $padrao = '') use ($cadastroUsuario) { return set_value($campo, $cadastroUsuario[$campo] ?? $padrao, false); };
+$assinaturaNome = $cadastroUsuario['assinatura'] ?? '';
+$assinaturaArquivo = $assinaturaNome && basename($assinaturaNome) === $assinaturaNome ? FCPATH . 'public/assets/uploads/' . $assinaturaNome : '';
+$assinaturaSrc = $assinaturaArquivo && is_file($assinaturaArquivo) ? base_url('public/assets/uploads/' . $assinaturaNome) . '?v=' . filemtime($assinaturaArquivo) : '';
+?>
+<link rel="stylesheet" href="<?= base_url('public/assets/css/usuario-editor.css') . '?v=' . filemtime(FCPATH . 'public/assets/css/usuario-editor.css') ?>">
+<main class="usuario-editor" aria-labelledby="user-editor-title">
+    <nav class="user-editor-breadcrumb" aria-label="Localização"><a href="<?= base_url('usuarios') ?>">Usuários</a><i class="bx bx-chevron-right" aria-hidden="true"></i><span><?= $editandoUsuario ? 'Editar usuário' : 'Adicionar usuário' ?></span></nav>
+    <h1 class="sr-only" id="user-editor-title"><?= $editandoUsuario ? 'Editar usuário' : 'Adicionar usuário' ?></h1>
+    <form id="usuario-editor-form" class="needs-validation" novalidate action="<?= base_url('usuarios/' . $baseUrl) ?>" method="post" enctype="multipart/form-data">
+        <?= csrf_field() ?>
+        <?php if (isset($validation)): ?><div class="alert alert-danger" role="alert"><?= $validation->listErrors() ?></div><?php endif ?>
+        <div class="user-editor-grid"><div class="user-editor-main">
+            <section class="user-editor-summary" aria-label="Resumo do usuário"><span class="user-summary-icon"><i class="bx bx-user" aria-hidden="true"></i></span><div><h2 id="user-summary-name"><?= esc($campoUsuario('nome_completo') ?: 'Novo usuário') ?></h2><p id="user-summary-login"><?= esc($campoUsuario('usuario') ?: 'Preencha os dados de acesso') ?></p><span class="user-summary-job"><i class="bx bx-briefcase" aria-hidden="true"></i><span id="user-summary-job"><?= esc($campoUsuario('cargo') ?: 'Cargo não informado') ?></span></span></div></section>
+            <fieldset class="user-editor-card"><legend><i class="bx bx-user" aria-hidden="true"></i> Dados pessoais</legend><div class="user-fields user-fields-two"><div class="form-group"><label for="user-nome">Nome completo <span aria-hidden="true">*</span></label><input id="user-nome" type="text" name="nome_completo" class="form-control" value="<?= esc($campoUsuario('nome_completo')) ?>" minlength="3" maxlength="50" autocomplete="name" required><div class="invalid-feedback">Informe o nome completo.</div></div><div class="form-group"><label for="user-social">Nome social</label><input id="user-social" type="text" name="nome_social" class="form-control" value="<?= esc($campoUsuario('nome_social')) ?>" maxlength="255"></div></div></fieldset>
+            <fieldset class="user-editor-card"><legend><i class="bx bx-lock-alt" aria-hidden="true"></i> Dados de acesso</legend><div class="user-fields user-fields-three"><div class="form-group"><label for="user-login">Usuário (login) <span aria-hidden="true">*</span></label><div class="user-input-icon"><i class="bx bx-user" aria-hidden="true"></i><input id="user-login" type="text" name="usuario" class="form-control" value="<?= esc($campoUsuario('usuario')) ?>" minlength="3" maxlength="50" autocomplete="off" required></div><div class="invalid-feedback">Informe o login do usuário.</div></div>
+                <?php foreach (['senha1' => 'Senha', 'senha2' => 'Confirmar senha'] as $campoSenha => $rotuloSenha): ?><div class="form-group"><label for="user-<?= esc($campoSenha) ?>"><?= esc($rotuloSenha) ?><?php if (!$editandoUsuario): ?> <span aria-hidden="true">*</span><?php endif ?></label><div class="user-password-field"><input id="user-<?= esc($campoSenha) ?>" type="password" name="<?= esc($campoSenha) ?>" class="form-control" value="" minlength="3" autocomplete="new-password" <?= $editandoUsuario ? '' : 'required' ?>><button type="button" class="user-toggle-password" aria-controls="user-<?= esc($campoSenha) ?>" aria-pressed="false" aria-label="<?= esc('Mostrar ' . mb_strtolower($rotuloSenha)) ?>"><i class="bx bx-show" aria-hidden="true"></i></button></div></div><?php endforeach ?>
+            </div><p class="user-editor-help"><?= $editandoUsuario ? 'Deixe os dois campos de senha vazios para manter a senha atual.' : 'Defina a senha e repita no campo de confirmação.' ?></p></fieldset>
+            <fieldset class="user-editor-card"><legend><i class="bx bx-briefcase" aria-hidden="true"></i> Dados profissionais</legend><div class="user-fields user-fields-professional"><div class="form-group"><label for="user-siape">SIAPE <span aria-hidden="true">*</span></label><input id="user-siape" type="text" name="siape" class="form-control" value="<?= esc($campoUsuario('siape')) ?>" inputmode="numeric" pattern="[0-9]{3,8}" minlength="3" maxlength="8" required><div class="invalid-feedback">Informe o SIAPE com 3 a 8 dígitos.</div></div><div class="form-group"><label for="user-cargo">Cargo <span aria-hidden="true">*</span></label><input id="user-cargo" type="text" name="cargo" class="form-control" value="<?= esc($campoUsuario('cargo')) ?>" minlength="3" maxlength="50" required></div><div class="form-group"><label for="user-authlevel">Tipo de usuário <span aria-hidden="true">*</span></label><select id="user-authlevel" name="authlevel" class="custom-select" required><option value="0" <?= (string) $campoUsuario('authlevel', COMUM) === '0' ? 'selected' : '' ?>>Comum</option><option value="1" <?= (string) $campoUsuario('authlevel', COMUM) === '1' ? 'selected' : '' ?>>Administrador</option></select></div></div></fieldset>
+            <fieldset class="user-editor-card"><legend><i class="bx bx-phone" aria-hidden="true"></i> Contato</legend><div class="user-fields user-fields-two"><div class="form-group"><label for="user-email">E-mail</label><div class="user-input-icon"><i class="bx bx-envelope" aria-hidden="true"></i><input id="user-email" type="email" name="email" class="form-control" value="<?= esc($campoUsuario('email')) ?>" maxlength="255" autocomplete="email"></div></div><div class="form-group"><label for="user-telefone">Telefone</label><div class="user-input-icon"><i class="bx bx-phone" aria-hidden="true"></i><input id="user-telefone" type="tel" name="telefone" class="form-control" value="<?= esc($campoUsuario('telefone')) ?>" maxlength="255" autocomplete="tel"></div></div></div></fieldset>
+        </div><aside class="user-editor-sidebar">
+            <section class="user-editor-card user-signature-card" aria-labelledby="user-signature-title"><h2 id="user-signature-title"><i class="bx bx-pen" aria-hidden="true"></i> Assinatura</h2><div class="user-signature-preview" data-original-src="<?= esc($assinaturaSrc) ?>"><img id="user-signature-image" <?= $assinaturaSrc ? 'src="' . esc($assinaturaSrc) . '"' : '' ?> alt="Assinatura do usuário" <?= $assinaturaSrc ? '' : 'hidden' ?>><div id="user-signature-empty" <?= $assinaturaSrc ? 'hidden' : '' ?>><i class="bx bx-pen" aria-hidden="true"></i><span>Nenhuma assinatura disponível</span></div><span id="user-signature-removed" hidden>Será removida ao salvar</span></div><div class="user-signature-actions"><button type="button" id="user-signature-pick"><i class="bx bx-upload" aria-hidden="true"></i> <?= $assinaturaSrc ? 'Alterar assinatura' : 'Selecionar assinatura' ?></button><button type="button" id="user-signature-remove" <?= $assinaturaNome ? '' : 'disabled' ?>><i class="bx bx-trash" aria-hidden="true"></i> <span>Remover</span></button></div><label for="user-assinatura" class="sr-only">Selecionar arquivo de assinatura</label><input type="file" id="user-assinatura" name="assinatura" accept="image/jpeg,image/png,.jpg,.jpeg,.png" aria-describedby="user-signature-help user-signature-error"><p id="user-signature-help" class="user-signature-help">JPG, JPEG ou PNG. Máximo de 4 MB.</p><p id="user-signature-error" class="user-signature-error" role="alert" hidden></p><p id="user-signature-status" class="user-signature-status" role="status">As alterações da assinatura serão aplicadas ao salvar.</p></section>
+            <section class="user-editor-card user-account-card" aria-labelledby="user-account-title"><h2 id="user-account-title"><i class="bx bx-cog" aria-hidden="true"></i> Configurações da conta</h2><label class="user-signature-switch"><input type="checkbox" id="deleteAssinatura" name="deleteAssinatura" value="1" <?= $assinaturaNome ? '' : 'disabled' ?> <?= set_value('deleteAssinatura', '', false) ? 'checked' : '' ?>><span class="user-switch-track" aria-hidden="true"></span><span>Remover assinatura atual<small>Marque para remover a assinatura cadastrada ao salvar.</small></span></label></section>
+        </aside></div>
+        <input type="hidden" name="usuario_id" value="<?= $editandoUsuario ? (int) $usuario['usuario_id'] : '' ?>">
+        <div class="user-editor-actions"><a href="<?= base_url('usuarios') ?>">Cancelar</a><button type="submit" name="submit"><i class="bx bx-save" aria-hidden="true"></i> <?= $editandoUsuario ? 'Salvar alterações' : 'Adicionar usuário' ?></button></div>
+    </form>
+</main>
+<script src="<?= base_url('public/assets/js/usuario-editor.js') . '?v=' . filemtime(FCPATH . 'public/assets/js/usuario-editor.js') ?>"></script>

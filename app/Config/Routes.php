@@ -21,7 +21,8 @@ $routes->setDefaultNamespace('App\Controllers');
 $routes->setDefaultMethod('index');
 $routes->setTranslateURIDashes(false);
 $routes->set404Override();
-$routes->setAutoRoute(true);
+$routes->setAutoRoute(false);
+
 
 /*
  * --------------------------------------------------------------------
@@ -32,15 +33,79 @@ $routes->setAutoRoute(true);
 // We get a performance increase by specifying the default
 // route since we don't have to scan directories.
 
-$routes->get('licenciandos/(:segment)/emitir/(:segment)', 'Documentos::emitir/$1/$2');
-$routes->get('licenciandos', 'Licenciandos::index');
-$routes->get('documentos', 'Documentos::index');
-$routes->get('universidades', 'Universidades::index');
-$routes->get('setores', 'Setores::index');
-$routes->get('usuarios', 'Usuarios::index');
-$routes->get('home', 'Home::index');
-$routes->get('login', 'Usuarios::login_index');
-$routes->get('/', 'Usuarios::login_index');
+$routes->get('/', 'Auth::index');
+$routes->get('login', 'Auth::index');
+$routes->post('login', 'Auth::login');
+$routes->get('logout', 'Auth::logout');
+
+$routes->group('home', ['filter' => 'login'], function ($routes) {
+    $routes->get('/', 'Home::index');
+});
+
+$routes->group('licenciandos', ['filter' => 'login'], function ($routes) {
+    $routes->get('', 'Licenciandos::index');
+    $routes->get('adicionar', 'Licenciandos::adicionar');
+    $routes->post('adicionar', 'Licenciandos::adicionar');
+    $routes->get('importar', 'Licenciandos::importar');
+    $routes->post('importar', 'Licenciandos::importar');
+    $routes->get('importar/modelo', 'Licenciandos::modelo_importacao');
+    $routes->post('importar/confirmar', 'Licenciandos::confirmar_importacao');
+    $routes->get('import_results', 'Licenciandos::import_results');
+    $routes->get('editar/(:num)/(:num)', 'Licenciandos::editar/$1/$2');
+    $routes->post('editar/(:num)/(:num)', 'Licenciandos::editar/$1/$2');
+    $routes->post('setor_select/(:num)', 'Licenciandos::setor_select/$1');
+    $routes->post('salvar', 'Licenciandos::salvar');
+    $routes->get('excluir/(:num)', 'Licenciandos::excluir/$1');
+    $routes->post('excluir/(:num)', 'Licenciandos::excluir/$1');
+});
+
+$routes->group('documentos', ['filter' => 'login', 'filter' => 'admin'], function ($routes) {
+    $routes->get('', 'Documentos::index');
+    $routes->get('adicionar', 'Documentos::adicionar');
+    $routes->post('adicionar', 'Documentos::adicionar');
+    $routes->get('editar/(:num)', 'Documentos::editar/$1');
+    $routes->post('editar/(:num)', 'Documentos::editar/$1');
+    $routes->get('layout_documentos', 'Documentos::layout_documentos');
+    $routes->post('salvar_layout', 'Documentos::salvar_layout');
+    $routes->get('cracha/(:num)/(:num)', 'Documentos::cracha/$1/$2');
+    $routes->get('emitir/(:num)/(:num)/(:num)', 'Documentos::emitir/$1/$2/$3');
+    $routes->post('salvar', 'Documentos::salvar');
+    $routes->get('excluir/(:num)', 'Documentos::excluir/$1');
+    $routes->post('excluir/(:num)', 'Documentos::excluir/$1');
+});
+
+$routes->group('universidades', ['filter' => 'login', 'filter' => 'admin'], function ($routes) {
+    $routes->get('', 'Universidades::index');
+    $routes->get('adicionar', 'Universidades::adicionar');
+    $routes->post('adicionar', 'Universidades::adicionar');
+    $routes->get('editar/(:num)', 'Universidades::editar/$1');
+    $routes->post('editar/(:num)', 'Universidades::editar/$1');
+    $routes->post('salvar', 'Universidades::salvar');
+    $routes->get('excluir/(:num)', 'Universidades::excluir/$1');
+    $routes->post('excluir/(:num)', 'Universidades::excluir/$1');
+});
+
+$routes->group('setores', ['filter' => 'login', 'filter' => 'admin'], function ($routes) {
+    $routes->get('', 'Setores::index');
+    $routes->get('adicionar', 'Setores::adicionar');
+    $routes->post('adicionar', 'Setores::adicionar');
+    $routes->get('editar/(:num)', 'Setores::editar/$1');
+    $routes->post('salvar', 'Setores::salvar');
+    $routes->get('excluir/(:num)', 'Setores::excluir/$1');
+});
+
+$routes->group('usuarios', ['filter' => 'login', 'filter' => 'admin'], function ($routes) {
+    $routes->get('', 'Usuarios::index');
+    $routes->add('adicionar', 'Usuarios::adicionar');
+    $routes->post('adicionar', 'Usuarios::adicionar');
+    $routes->add('editar/(:num)', 'Usuarios::editar/$1');
+    $routes->post('salvar', 'Usuarios::salvar');
+    $routes->get('excluir/(:num)', 'Usuarios::excluir/$1');
+    $routes->post('excluir/(:num)', 'Usuarios::excluir/$1');
+});
+
+
+
 
 /*
  * --------------------------------------------------------------------

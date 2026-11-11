@@ -1,95 +1,20 @@
-<script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
-<script type="text/javascript">
-    google.charts.load('current', {
-        'packages': ['table']
-    });
-    google.charts.setOnLoadCallback(drawTable);
-
-    function drawTable() {
-        var data = new google.visualization.DataTable();
-        data.addColumn('string', 'Email');
-        data.addColumn('string', 'Nome');
-        data.addColumn('string', 'Nome Social');
-        data.addColumn('string', 'Dre');
-        data.addColumn('string', 'Instituição(sigla)');
-        data.addColumn('string', 'Prof.ª Prática');
-        data.addColumn('string', 'Setor Curricular');
-        data.addColumn('string', 'Endereço');
-        data.addColumn('string', 'Bairro');
-        data.addColumn('string', 'Cep');
-        data.addColumn('string', 'Cidade');
-        data.addColumn('string', 'Telefone 1');
-        data.addColumn('string', 'Telefone 2');
-        data.addRows([
-            ['exemplo@gmail.com', 'Maria Clara', '', '1234567', 'UFRJ', 'Renata, Bruno Gomes', 'Matemática, Geografia', 'Rua clementina', 'Tijuca', '21022-404', 'Rio de Janeiro', '219940524', '']
-        ]);
-
-        var table = new google.visualization.Table(document.getElementById('table_div'));
-
-        table.draw(data, {
-            showRowNumber: false,
-            width: '100%',
-            height: '100%'
-        });
-    }
-</script>
-<div class="content">
-    <div class="row" style="place-content: center;">
-        <div class="col-md-8">
-            <div class="card ">
-                <div class="card-body ">
-                    <?= (isset($validation)) ? $validation->listErrors() : '' ?>
-                    <div class="form-row">
-                        <div class="form-group col-md-12">
-                            <strong><label for="nome">Formato CSV</label></strong>
-                            <p>Seu arquivo CSV deve estar nesta ordem:</p>
-                            <div class="card">
-                                <div id="table_div">
-                                </div>
-                            </div>
-                            <p>Nota: Se os campos <strong>Setor Curricular</strong> e <strong>Prof.ª Prática</strong> tiverem mais de um valor,
-                                esses valores devem ser separados por vírgulas.
-                                <br>Se esses valores forem provenientes de cadastros diferentes, a importação irá comparar o setor atual
-                                com o setor que está sendo cadastrado.
-                            </p>
-                        </div>
-                    </div>
-                    <form class="needs-validation" novalidate action="<?= base_url('/licenciandos/importar') ?>" method="post" enctype="multipart/form-data">
-                        <p class="input-group">
-                            <label for="userfile" class="required">Arquivo CSV</label></br>
-                            <?php
-                            echo form_upload(array(
-                                'name' => 'userfile',
-                                'id' => 'userfile',
-                                'size' => '40',
-                                'maxlength' => '255',
-                                'value' => '',
-                                'class' => 'form-control-file',
-                            ));
-                            ?>
-                            <small class="text-muted">
-                                Tamanho máximo do arquivo <strong>10MB</strong>.
-                            </small>
-                        <div class="form-group" style="width: max-content;">
-                            <label for="periodo">Período da importação:</label>
-                            <?php
-                            $field = 'periodo';
-                            $value = set_value($field, reset($periodos['Atual']), FALSE);
-                            echo form_dropdown($field, $periodos, $value, 'tabindex="-1" class="custom-select mr-sm-2" required');
-                            ?>
-                            <div class="invalid-feedback">
-                                Período é obrigatório
-                            </div>
-                        </div>
-                        </p>
-                        <div class="row">
-                            <div class="update ml-auto mr-auto">
-                                <input type="submit" name="submit" class="btn btn-primary btn-round" value="Importar">
-                            </div>
-                        </div>
-                    </form>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
+<main class="lic-import">
+<?= view('licenciandos/import/cabecalho', ['etapaImportacao' => 1]) ?>
+<?php if (isset($validation)): ?><div class="alert alert-danger" role="alert"><?= $validation->listErrors() ?></div><?php endif ?>
+<?php if (!empty($erroImportacao)): ?><div class="alert alert-danger" role="alert"><?= esc($erroImportacao) ?></div><?php endif ?>
+<form id="import-upload-form" action="<?= base_url('licenciandos/importar') ?>" method="post" enctype="multipart/form-data">
+    <?= csrf_field() ?>
+    <div class="import-grid"><section class="import-card import-upload-card" aria-labelledby="import-upload-title"><h2 id="import-upload-title"><i class="bx bx-upload" aria-hidden="true"></i> 1. Selecione o arquivo CSV</h2>
+        <div id="import-dropzone" class="import-dropzone"><i class="bx bx-cloud-upload" aria-hidden="true"></i><h3>Arraste e solte o arquivo aqui</h3><p>ou selecione no seu computador</p><button type="button" id="import-pick" class="import-secondary"><i class="bx bx-folder-open" aria-hidden="true"></i> Escolher arquivo</button><label for="userfile" class="sr-only">Arquivo CSV</label><input type="file" id="userfile" name="userfile" accept=".csv,text/csv" required aria-describedby="import-file-help import-client-error"></div>
+        <div id="import-file-selected" class="import-file-selected" hidden><i class="bx bx-file" aria-hidden="true"></i><span id="import-file-name"></span><small id="import-file-size"></small><button type="button" id="import-clear-file" aria-label="Limpar arquivo selecionado"><i class="bx bx-x" aria-hidden="true"></i></button></div>
+        <p id="import-file-help" class="import-file-help"><i class="bx bx-info-circle" aria-hidden="true"></i> CSV UTF-8 · Até 10 MB e 5.000 registros · Separador: ; ou ,</p><p id="import-client-error" class="import-error" role="alert" hidden></p>
+        <div class="import-period"><h2><i class="bx bx-calendar" aria-hidden="true"></i> Período da importação</h2><label for="import-period">Ano de referência <span aria-hidden="true">*</span></label><?php echo form_dropdown('periodo', $periodos, set_value('periodo', reset($periodos['Atual'])), 'id="import-period" class="custom-select" required'); ?><p>Os novos vínculos começam como Pendente, com zero horas. As datas de início e conclusão poderão ser preenchidas na edição.</p></div>
+    </section><div class="import-side"><section class="import-card" aria-labelledby="import-sample-title"><h2 id="import-sample-title"><i class="bx bx-table" aria-hidden="true"></i> Pré-visualização do arquivo</h2><p id="import-preview-empty" class="import-preview-empty">Após selecionar o CSV, uma amostra dos registros será exibida aqui.</p><div id="import-preview" hidden><div class="import-table-scroll"><table class="import-table"><thead><tr><th>Nome</th><th>DRE</th><th>Universidade</th><th>Setor</th></tr></thead><tbody id="import-preview-body"></tbody></table></div><p class="import-caption">Amostra de até 5 registros. A próxima etapa confere o arquivo completo e os cadastros existentes.</p></div></section>
+        <section class="import-card import-guidance"><h2><i class="bx bx-info-circle" aria-hidden="true"></i> Orientações</h2><ul><li>Baixe o modelo e substitua ou exclua a linha fictícia antes de enviar.</li><li>Mantenha as 13 colunas na ordem do modelo, inclusive as colunas vazias.</li><li>Use a sigla da universidade e o nome do setor cadastrados no sistema.</li><li>Para vários setores, separe os nomes por vírgula dentro do campo. Informe um professor por setor, na mesma ordem, quando preenchido.</li><li>O DRE identifica a pessoa. Vínculos já existentes pelo DRE/setor serão preservados, sem duplicação ou alteração dos dados pessoais.</li></ul></section>
+    </div></div>
+    <section class="import-card import-model" aria-labelledby="import-model-title"><div class="import-model-heading"><div><h2 id="import-model-title"><i class="bx bx-download" aria-hidden="true"></i> Modelo de arquivo</h2><p>Comece pelo CSV de exemplo ou consulte a estrutura abaixo.</p></div><a class="import-secondary" href="<?= base_url('licenciandos/importar/modelo') ?>"><i class="bx bx-download" aria-hidden="true"></i> Baixar CSV de exemplo</a></div><details><summary>Ver as 13 colunas e a linha de exemplo</summary><div class="import-table-scroll"><table class="import-table"><thead><tr><?php foreach ($cabecalhosImportacao as $coluna): ?><th><?= esc($coluna) ?></th><?php endforeach ?></tr></thead><tbody><tr><?php foreach ($exemploImportacao as $valor): ?><td><?= esc($valor) ?></td><?php endforeach ?></tr></tbody></table></div></details><p class="import-caption">Preserve os zeros à esquerda do DRE. No Excel, trate essa coluna como texto antes de salvar em CSV UTF-8.</p></section>
+    <div class="import-actions"><a href="<?= base_url('licenciandos') ?>" class="import-cancel">Cancelar</a><button type="submit" id="import-advance" class="import-primary" disabled>Avançar para conferência <i class="bx bx-right-arrow-alt" aria-hidden="true"></i></button></div>
+    <noscript><p class="import-caption">Selecione um CSV pelo campo de arquivo. A conferência no servidor será feita antes de importar.</p><style>#userfile{position:static!important;opacity:1!important;width:auto!important;height:auto!important}#import-advance{display:none}</style><button class="import-primary" type="submit">Conferir CSV</button></noscript>
+</form>
+</main>
+<script src="<?= base_url('public/assets/js/licenciandos-importacao.js') . '?v=' . filemtime(FCPATH . 'public/assets/js/licenciandos-importacao.js') ?>"></script>

@@ -23,6 +23,9 @@ use CodeIgniter\Exceptions\FrameworkException;
  */
 
 Events::on('pre_system', static function () {
+    if (ENVIRONMENT !== 'testing' && !is_cli()) {
+        \App\Libraries\LimpezaTemporarios::automatica();
+    }
     if (ENVIRONMENT !== 'testing') {
         if (ini_get('zlib.output_compression')) {
             throw FrameworkException::forEnabledZlibOutputCompression();

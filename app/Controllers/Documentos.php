@@ -50,7 +50,17 @@ class Documentos extends BaseController
      */
     public function adicionar()
     {
+        session()->set('posicao', 'Documentos');
         $this->data['titulo'] = 'Adicionar';
+
+        $copiar = $this->request->getGet('copiar');
+        if ($this->request->getMethod() === 'get' && $copiar !== null) {
+            $origem = is_string($copiar) && ctype_digit($copiar) ? $this->documentosModel->find((int) $copiar) : null;
+            if (!$origem) {
+                throw new \CodeIgniter\Exceptions\PageNotFoundException();
+            }
+            $this->data['modeloOrigem'] = $origem;
+        }
 
         if ($this->request->getMethod() == 'post') {
             $this->salvar();
@@ -69,6 +79,7 @@ class Documentos extends BaseController
      */
     public function editar($id = null)
     {
+        session()->set('posicao', 'Documentos');
         $this->data = [
             'titulo' => 'Editar',
             'documento' => $this->documentosModel->getDocumentos($id),
@@ -117,8 +128,69 @@ class Documentos extends BaseController
     {
         $this->documentosModel->delete($id);
         session()->setFlashdata('msg', msgbox('success', 'O documento foi deletado.'));
-        return redirect('documentos');
+        return redirect()->to('documentos');
     }
+
+    public function layout_documentos($id = null)
+    {
+        session()->set('posicao', 'Documentos');
+        $this->data = [
+            'titulo' => 'Cabeçalho dos documentos',
+            'erroCabecalho' => $this->data['erroCabecalho'] ?? null,
+        ];
+
+        $imagens = $this->obterImagensCabecalho();
+
+        $this->data['imagens'] = $imagens;
+        $this->data['body'] = view('documentos/documentos_layout', $this->data);
+        return $this->render();
+    }
+
+    private function obterImagensCabecalho()
+    {
+        $dir = FCPATH . 'public/assets/img/documentos/cabecalho/';
+        $imagens = [];
+
+        for ($i = 1; $i <= 3; $i++) {
+            $encontrada = false;
+            foreach (['jpg', 'jpeg', 'png'] as $ext) {
+                $caminho = $dir . "img{$i}.{$ext}";
+                if (file_exists($caminho)) {
+                    $imagens[] = "public/assets/img/documentos/cabecalho/img{$i}.{$ext}";
+                    $encontrada = true;
+                    break;
+                }
+            }
+            if (!$encontrada) {
+                $imagens[] = null; // Nenhuma imagem encontrada nesse slot
+            }
+        }
+
+        return $imagens;
+    }
+
+
+    public function salvar_layout()
+    {
+        $uploads = []; $remover = [];
+        foreach (range(1, 3) as $slot) {
+            $uploads[$slot] = $this->request->getFile('imagem' . $slot);
+            $remover[$slot] = (bool) $this->request->getPost('deleteImagem' . $slot);
+        }
+        try {
+            (new \App\Libraries\CabecalhoDocumentos())->salvar($uploads, $remover);
+        } catch (\InvalidArgumentException $erro) {
+            $this->data['erroCabecalho'] = $erro->getMessage();
+            return $this->layout_documentos();
+        } catch (\Throwable $erro) {
+            log_message('error', 'Falha ao salvar cabeçalho: {erro}', ['erro' => $erro->getMessage()]);
+            $this->data['erroCabecalho'] = 'Não foi possível salvar o cabeçalho. Tente novamente.';
+            return $this->layout_documentos();
+        }
+        session()->setFlashdata('msg', msgbox('success', 'Cabeçalho atualizado com sucesso.'));
+        return redirect()->to('documentos/layout_documentos');
+    }
+
     public function cracha($licendiando_id, $setor_id)
     {
         $this->data = [
@@ -136,7 +208,7 @@ class Documentos extends BaseController
         $response = service('response');
         $html = view('documentos/modelo_cracha', $this->data);
 
-        $dompdf->load_html($html);
+        $dompdf->loadHtml($html);
 
         // (Opcional) Configuração do papel e orientação
         $dompdf->setPaper('A4', 'portrait');
@@ -166,15 +238,17 @@ class Documentos extends BaseController
             throw new \CodeIgniter\Exceptions\PageNotFoundException();
         }
 
+        $this->data['cabecalho_imagens'] = $this->obterImagensCabecalho();
+
         $documentoSetor = $this->setoresModal->find($this->data['setor']['setor_id'])['nome'];
 
-        $this->data['documento']['nome'] = mb_strtoupper($this->data['documento']['nome']);
+        $this->data['titulo_documento'] = mb_strtoupper($this->data['documento']['nome']);
         $conteudo =  $this->data['documento']['conteudo'];
         $horas_estagios = $this->data['setor']['horas_estagio'] . ' (' . $this->valorPorExtenso($this->data['setor']['horas_estagio'], false, false) . ')';
-        $dataCadastro = strftime('%d/%m/%Y', strtotime($this->data['setor']['data_cadastro']));
-        $datainicio = strftime('%d/%m/%Y', strtotime($this->data['setor']['data_inicio']));
-        $dataTermino = strftime('%d/%m/%Y', strtotime($this->data['setor']['data_termino']));
-        $anoTermino = strftime('%Y', strtotime($this->data['setor']['data_termino']));
+        $dataCadastro = (new DateTime($this->data['setor']['data_cadastro']))->format('d/m/Y');
+        $datainicio = (new DateTime($this->data['setor']['data_inicio']))->format('d/m/Y');
+        $dataTermino = (new DateTime($this->data['setor']['data_termino']))->format('d/m/Y');
+        $anoTermino = (new DateTime($this->data['setor']['data_termino']))->format('Y');
 
         if (empty($dataCadastro)) {
             $dataCadastro = "XX/XX/XXXX";
@@ -207,12 +281,17 @@ class Documentos extends BaseController
         $dateTimeObj = new DateTime('now', new DateTimeZone('America/Sao_Paulo'));
         $this->data['data'] = IntlDateFormatter::formatObject($dateTimeObj, "'Rio de Janeiro,' d 'de' MMMM 'de' y.", 'pt_BR');
 
+        // Dados Usuário
+        $this->data['nome_usuario'] = session()->get('usuario')['nome_completo'];
+        $this->data['cargo'] = session()->get('usuario')['cargo'];
+        $this->data['siape'] = session()->get('usuario')['siape'];
+        $this->data['assinatura'] = session()->get('usuario')['assinatura'];
+
         $dompdf = new Dompdf();
         $response = service('response');
 
         $html = view('documentos/molde_declaracao', $this->data);
-
-        $dompdf->load_html($html);
+        $dompdf->loadHtml($html);
 
         // (Opcional) Configuração do papel e orientação
         $dompdf->setPaper('A4', 'portrait');
