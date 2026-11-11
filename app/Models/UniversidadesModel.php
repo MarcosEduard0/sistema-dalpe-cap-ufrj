@@ -16,7 +16,7 @@ class UniversidadesModel extends Model
     public function getUniversidadesComTotais()
     {
         return $this->select('universidades.universidade_id, universidades.sigla, universidades.nome, COUNT(licenciandos.licenciando_id) AS total_licenciandos')
-            ->join('licenciandos', 'licenciandos.universidade_id = universidades.universidade_id', 'left')
+            ->join('licenciandos', 'licenciandos.universidade_id = universidades.universidade_id AND licenciandos.deleted_at IS NULL', 'left')
             ->groupBy(['universidades.universidade_id', 'universidades.sigla', 'universidades.nome'])->findAll();
     }
 

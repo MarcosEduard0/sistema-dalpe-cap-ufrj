@@ -131,12 +131,7 @@ class Licenciandos extends BaseController
         $db = \Config\Database::connect();
         $db->transBegin();
         try {
-            if (!$this->licenciandoSetorModel->where('licenciando_id', $id)->delete()) throw new \RuntimeException('Falha ao remover os vínculos.');
             if (!$this->licenciandosModel->delete($id)) throw new \RuntimeException('Falha ao remover o cadastro.');
-            $enderecoId = $pessoa['endereco_id'];
-            if ($enderecoId && !$db->table('licenciandos')->where('endereco_id', $enderecoId)->countAllResults()) {
-                if (!$this->enderecoModel->delete($enderecoId)) throw new \RuntimeException('Falha ao remover o endereço.');
-            }
             if (!$db->transStatus()) throw new \RuntimeException('Falha na exclusão.');
             $db->transCommit();
         } catch (\Throwable $erro) {
@@ -187,6 +182,7 @@ class Licenciandos extends BaseController
 
         if (!empty($licenciandoId)) {
             $licenciando = $this->licenciandosModel->getLicenciandos($licenciandoId);
+            if (!$licenciando) throw new \CodeIgniter\Exceptions\PageNotFoundException();
             $dreAntigo = $licenciando['dre'];
 
             if (!strcmp($dreAntigo, $dreNovo))

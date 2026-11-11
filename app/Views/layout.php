@@ -3,6 +3,14 @@
 
 <head>
     <meta charset="utf-8" />
+    <script>
+        // Restaure a largura antes de carregar o CSS e renderizar o menu.
+        try {
+            if (window.matchMedia('(min-width:768px)').matches && localStorage.getItem('dalpe.nav.collapsed') === 'true') {
+                document.documentElement.classList.add('nav-collapsed');
+            }
+        } catch (_) {}
+    </script>
     <link rel="apple-touch-icon" sizes="76x76" href="<?= base_url("public/assets/img/apple-icon.png") ?>">
     <link rel="icon" type="image/png" href="<?= base_url("public/assets/img/favicon.png") ?>">
     <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
@@ -62,6 +70,7 @@
                                 <span class="nav_name">Usuários</span>
                             </a>
                         <?php endif ?>
+                        <a href="<?= base_url('relatorios') ?>" class="nav_link <?= session()->get('posicao') === 'Relatorios' ? 'active_nav' : '' ?>"><i class="bx bx-bar-chart-alt-2 nav_icon" aria-hidden="true"></i><span class="nav_name">Relatórios</span></a>
                     </div>
                 </div> <a href="<?= base_url('/logout') ?>" class="nav_link">
                     <i class='bx bx-log-out nav_icon'></i>

@@ -59,7 +59,7 @@ document.addEventListener('DOMContentLoaded', function () {
     try { collapsed = localStorage.getItem('dalpe.nav.collapsed') === 'true'; } catch (_) {}
     function update() {
         const open = mobile.matches ? body.classList.contains('nav-open') : !collapsed;
-        body.classList.toggle('nav-collapsed', !mobile.matches && collapsed);
+        document.documentElement.classList.toggle('nav-collapsed', !mobile.matches && collapsed);
         overlay.hidden = !mobile.matches || !open;
         button.setAttribute('aria-expanded', String(open));
         button.setAttribute('aria-label', open ? 'Recolher menu' : 'Abrir menu');

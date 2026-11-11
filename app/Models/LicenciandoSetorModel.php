@@ -67,8 +67,10 @@ class LicenciandoSetorModel extends Model
     public function getLicenciandosSetores($id = false)
     {
         $builder = $this->builder()->join('setores', 'setores.setor_id = licenciandosetor.setor_id');
+        $builder->join('licenciandos', 'licenciandos.licenciando_id = licenciandosetor.licenciando_id AND licenciandos.deleted_at IS NULL')
+            ->select('licenciandosetor.*, setores.nome');
         if ($id !== false) {
-            $builder->where('licenciando_id', $id);
+            $builder->where('licenciandosetor.licenciando_id', $id);
         }
         return array_map([self::class, 'classificar'], $builder->get()->getResultArray());
     }
@@ -76,7 +78,9 @@ class LicenciandoSetorModel extends Model
     public function getPeriodCount($id = false)
     {
 
-        return $this->select('periodo, COUNT(periodo) as quantidade')->where('periodo !=', '')->groupBy('periodo')->get()->getResultArray();
+        return $this->select('periodo, COUNT(periodo) as quantidade')
+            ->join('licenciandos', 'licenciandos.licenciando_id = licenciandosetor.licenciando_id AND licenciandos.deleted_at IS NULL')
+            ->where('periodo !=', '')->groupBy('periodo')->get()->getResultArray();
     }
 }
 

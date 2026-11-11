@@ -142,6 +142,9 @@ class ImportacaoLicenciandos
             if (mb_strlen($d['nome_completo']) < 3) $erros[] = 'Informe o nome completo';
             if ($d['nome_completo'] === self::EXEMPLO_NOME) $erros[] = 'Substitua ou exclua a linha fictícia do modelo';
             if ($d['dre'] === '') $erros[] = 'DRE obrigatório';
+            foreach ($existentes[self::chaveDre($d['dre'])] ?? [] as $existente) {
+                if (!empty($existente['deleted_at'])) $erros[] = 'DRE pertence a cadastro excluído. Solicite a restauração antes de importar.';
+            }
             $uni = $universidades[self::chave($d['universidade'])] ?? [];
             if (count($uni) !== 1) $erros[] = 'Sigla de universidade inexistente ou ambígua';
             $nomesSetores = array_map('trim', explode(',', $d['setor']));

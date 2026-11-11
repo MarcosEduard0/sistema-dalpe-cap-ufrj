@@ -10,6 +10,12 @@ class LicenciandosModel extends Model
     //Atributos de config
     protected $table = 'licenciandos';
     protected $primaryKey = 'licenciando_id';
+    protected $useTimestamps = true;
+    protected $useSoftDeletes = true;
+    protected $dateFormat = 'datetime';
+    protected $createdField = 'created_at';
+    protected $updatedField = 'updated_at';
+    protected $deletedField = 'deleted_at';
     protected $allowedFields = [
         'dre', 'nome_completo', 'nome_social', 'email',
         'telefone1', 'telefone2', 'endereco_id', 'universidade_id', 'observacao'
@@ -66,7 +72,7 @@ class LicenciandosModel extends Model
             LEFT JOIN universidades as u
             on l.universidade_id = u.universidade_id
             LEFT JOIN enderecos as e
-            on l.endereco_id = e.endereco_id;";
+            on l.endereco_id = e.endereco_id WHERE l.deleted_at IS NULL;";
             $query = $this->query($sql);
             return $query->getResultArray();
         } else {
@@ -76,7 +82,7 @@ class LicenciandosModel extends Model
             on l.universidade_id = u.universidade_id
             LEFT JOIN enderecos as e
             on l.endereco_id = e.endereco_id
-            WHERE l.licenciando_id = :id:";
+            WHERE l.licenciando_id = :id: AND l.deleted_at IS NULL";
             $query = $this->query($sql, [
                 'id' => $id,
             ]);
@@ -87,7 +93,7 @@ class LicenciandosModel extends Model
     public function getTotalLicenciando()
     {
         $sql = 'SELECT COUNT(licenciando_id) as quantidade 
-        FROM licenciandos;';
+        FROM licenciandos WHERE deleted_at IS NULL;';
         $query = $this->query($sql);
 
         return $query->getFirstRow('array');
@@ -101,7 +107,7 @@ class LicenciandosModel extends Model
         on ls.licenciando_id = l.licenciando_id
         INNER JOIN setores as s
         on ls.setor_id = s.setor_id
-        GROUP BY s.setor_id;";
+        WHERE l.deleted_at IS NULL GROUP BY s.setor_id;";
 
         $query = $this->query($sql);
         return $query->getResultArray();
@@ -113,7 +119,7 @@ class LicenciandosModel extends Model
         FROM licenciandos as l
         RIGHT JOIN universidades as u
         on l.universidade_id = u.universidade_id
-        GROUP BY l.universidade_id
+        WHERE l.deleted_at IS NULL GROUP BY l.universidade_id
         HAVING quantidade > 0;";
 
         $query = $this->query($sql);

@@ -38,6 +38,11 @@ $routes->get('login', 'Auth::index');
 $routes->post('login', 'Auth::login');
 $routes->get('logout', 'Auth::logout');
 
+$routes->group('relatorios', ['filter' => 'login'], function ($routes) {
+    $routes->get('', 'Relatorios::index');
+    $routes->get('exportar', 'Relatorios::exportar');
+});
+
 $routes->group('home', ['filter' => 'login'], function ($routes) {
     $routes->get('/', 'Home::index');
 });
